@@ -11,7 +11,7 @@ import {
 import { MomentService } from "../../services/MomentService";
 import { Category, DEFAULT_CATEGORIES, Moment } from "../../types";
 
-export default function MemoriesScreen() {
+export default function MemoriesComponent() {
   const [moments, setMoments] = useState<Moment[]>([]);
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");

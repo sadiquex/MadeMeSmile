@@ -13,7 +13,7 @@ import { MediaFile, MediaService } from "../../services/MediaService";
 import { MomentService } from "../../services/MomentService";
 import { DEFAULT_CATEGORIES, MOOD_OPTIONS } from "../../types";
 
-export default function AddMomentScreen() {
+export default function AddMoment() {
   const [content, setContent] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("random");
   const [selectedMood, setSelectedMood] = useState<string>("");

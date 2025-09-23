@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { MomentService } from "../../services/MomentService";
 
-export default function ProfileScreen() {
+export default function ProfileScreenComponent() {
   const [stats, setStats] = useState({
     totalMoments: 0,
     momentsThisWeek: 0,
