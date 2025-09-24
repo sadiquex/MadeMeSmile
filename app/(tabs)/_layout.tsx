@@ -1,11 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
+import {
+  Camera01Icon,
+  FavouriteIcon,
+  Home05Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#3B82F6",
+        tabBarActiveTintColor: "#2b2c32",
         tabBarInactiveTintColor: "#9CA3AF",
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
@@ -34,17 +40,9 @@ export default function TabsLayout() {
         name="timeline"
         options={{
           title: "Timeline",
+          href: null,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="add-moment"
-        options={{
-          title: "Add Moment",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="camera" size={size} color={color} />
+            <HugeiconsIcon icon={Home05Icon} size={size} color={color} />
           ),
         }}
       />
@@ -53,7 +51,16 @@ export default function TabsLayout() {
         options={{
           title: "Memories",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart" size={size} color={color} />
+            <HugeiconsIcon icon={FavouriteIcon} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="add-moment"
+        options={{
+          title: "Add Moment",
+          tabBarIcon: ({ color, size }) => (
+            <HugeiconsIcon icon={Camera01Icon} size={size} color={color} />
           ),
         }}
       />

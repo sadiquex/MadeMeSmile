@@ -4,6 +4,7 @@ export interface Moment {
   mediaType: "photo" | "video" | "audio" | "text";
   mediaUrl?: string;
   category: string;
+  collection?: string;
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -64,4 +65,11 @@ export const MOOD_OPTIONS = [
   { id: "grateful", label: "Grateful", emoji: "🙏" },
   { id: "excited", label: "Excited", emoji: "🎉" },
   { id: "peaceful", label: "Peaceful", emoji: "😌" },
+] as const;
+
+export const COLLECTION_OPTIONS = [
+  { value: "daily-moments", label: "Daily Moments", icon: "📅" },
+  { value: "family-time", label: "Family Time", icon: "👨‍👩‍👧‍👦" },
+  { value: "learning-growth", label: "Learning & Growth", icon: "📚" },
+  { value: "random-joy", label: "Random Joy", icon: "✨" },
 ] as const;

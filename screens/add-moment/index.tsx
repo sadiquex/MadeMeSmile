@@ -1,4 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Camera01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
+import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import {
   Alert,
@@ -11,12 +14,17 @@ import {
 } from "react-native";
 import { MediaFile, MediaService } from "../../services/MediaService";
 import { MomentService } from "../../services/MomentService";
-import { DEFAULT_CATEGORIES, MOOD_OPTIONS } from "../../types";
+import {
+  COLLECTION_OPTIONS,
+  DEFAULT_CATEGORIES,
+  MOOD_OPTIONS,
+} from "../../types";
 
 export default function AddMoment() {
   const [content, setContent] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("random");
   const [selectedMood, setSelectedMood] = useState<string>("");
+  const [selectedCollection, setSelectedCollection] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -35,6 +43,7 @@ export default function AddMoment() {
         mediaType: mediaFile ? mediaFile.type : "text",
         mediaUrl: mediaFile?.uri,
         category: selectedCategory,
+        collection: selectedCollection || undefined,
         tags,
         mood: selectedMood as any,
       });
@@ -43,10 +52,12 @@ export default function AddMoment() {
         {
           text: "OK",
           onPress: () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             // Reset form
             setContent("");
             setSelectedCategory("random");
             setSelectedMood("");
+            setSelectedCollection("");
             setTags([]);
             setNewTag("");
             setMediaFile(null);
@@ -90,25 +101,25 @@ export default function AddMoment() {
 
   return (
     <ScrollView className="flex-1 bg-gray-50">
-      <View className="px-4 py-6">
+      <View className="p-4 gap-4">
         {/* Header */}
-        <View className="mb-6">
-          <Text className="text-2xl font-sora-bold text-gray-900 mb-2">
-            Capture Your Moment ✨
-          </Text>
-          <Text className="font-sora text-gray-600">
+        <View className="mb-4">
+          <Text className="text-2xl font-sora-bold text-gray-900">
             What made you smile today?
+          </Text>
+          <Text className="text-gray-600 font-sora">
+            Capture your happy moments and save them forever
           </Text>
         </View>
 
         {/* Content Input */}
-        <View className="mb-6">
+        <View className="">
           <Text className="font-sora-medium text-gray-900 mb-3">
             Tell us about your moment
           </Text>
           <View className="bg-white rounded-lg p-4 border border-gray-200">
             <TextInput
-              className="font-sora text-gray-900 min-h-[120px] text-base"
+              className="font-sora text-gray-900 min-h-[30px] text-base"
               placeholder="Share what made you smile today..."
               value={content}
               onChangeText={setContent}
@@ -123,7 +134,7 @@ export default function AddMoment() {
         </View>
 
         {/* Category Selection */}
-        <View className="mb-6">
+        <View className="">
           <Text className="font-sora-medium text-gray-900 mb-3">Category</Text>
           <View className="flex-row flex-wrap gap-3">
             {DEFAULT_CATEGORIES.map((category) => (
@@ -131,20 +142,18 @@ export default function AddMoment() {
                 key={category.id}
                 className={`${
                   selectedCategory === category.id
-                    ? "bg-blue-500"
+                    ? "bg-yellow-400"
                     : "bg-white border border-gray-200"
-                } rounded-lg px-4 py-3 flex-row items-center`}
-                onPress={() => setSelectedCategory(category.id)}
+                } px-4 py-1 rounded-full items-center`}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedCategory(category.id);
+                }}
               >
-                <Ionicons
-                  name={category.icon as any}
-                  size={20}
-                  color={selectedCategory === category.id ? "white" : "#6B7280"}
-                />
                 <Text
-                  className={`ml-2 font-sora-medium ${
+                  className={`font-sora text-xs ${
                     selectedCategory === category.id
-                      ? "text-white"
+                      ? "text-gray-900"
                       : "text-gray-600"
                   }`}
                 >
@@ -156,7 +165,7 @@ export default function AddMoment() {
         </View>
 
         {/* Mood Selection */}
-        <View className="mb-6">
+        <View className="">
           <Text className="font-sora-medium text-gray-900 mb-3">
             How are you feeling?
           </Text>
@@ -169,7 +178,10 @@ export default function AddMoment() {
                     ? "bg-yellow-400"
                     : "bg-white border border-gray-200"
                 } rounded-lg px-4 py-3 items-center`}
-                onPress={() => setSelectedMood(mood.id)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedMood(mood.id);
+                }}
               >
                 <Text className="text-2xl mb-1">{mood.emoji}</Text>
                 <Text
@@ -185,16 +197,16 @@ export default function AddMoment() {
         </View>
 
         {/* Tags */}
-        <View className="mb-6">
+        <View className="">
           <Text className="font-sora-medium text-gray-900 mb-3">
-            Tags (optional)
+            Hashtags? (Optional)
           </Text>
 
           {/* Add Tag Input */}
           <View className="flex-row items-center mb-3">
             <TextInput
               className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 font-sora text-gray-900"
-              placeholder="Add a tag..."
+              placeholder="Add some hashtags..."
               value={newTag}
               onChangeText={setNewTag}
               onSubmitEditing={addTag}
@@ -226,25 +238,8 @@ export default function AddMoment() {
           )}
         </View>
 
-        {/* Save Button */}
-        <TouchableOpacity
-          className={`${
-            isSaving ? "bg-gray-400" : "bg-blue-500"
-          } rounded-lg py-4 mt-6`}
-          onPress={handleSaveMoment}
-          disabled={isSaving}
-        >
-          <Text className="text-white text-center font-sora-bold text-lg">
-            {isSaving ? "Saving..." : "Save Moment"}
-          </Text>
-        </TouchableOpacity>
-
         {/* Media Section */}
-        <View className="mb-6">
-          <Text className="font-sora-medium text-gray-900 mb-3">
-            Add Media (optional)
-          </Text>
-
+        <View className="">
           {mediaFile ? (
             <View className="bg-white rounded-lg p-4 border border-gray-200">
               <View className="flex-row items-center justify-between mb-3">
@@ -301,16 +296,63 @@ export default function AddMoment() {
               className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 items-center"
               onPress={handleAddMedia}
             >
-              <Ionicons name="camera" size={32} color="#6B7280" />
+              <HugeiconsIcon icon={Camera01Icon} />
+
               <Text className="font-sora-medium text-gray-700 mt-2">
                 Add Photo, Video, or Audio
               </Text>
-              <Text className="font-sora text-gray-500 text-sm mt-1">
+              {/* <Text className="font-sora text-gray-500 text-sm mt-1">
                 Tap to capture or choose from gallery
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           )}
         </View>
+
+        {/* Collection Selection */}
+        <View className="">
+          <Text className="font-sora-medium text-gray-900 mb-3">
+            Save to Collection (optional)
+          </Text>
+          <View className="flex-row flex-wrap gap-3">
+            {COLLECTION_OPTIONS.map((collection) => (
+              <TouchableOpacity
+                key={collection.value}
+                className={`${
+                  selectedCollection === collection.value
+                    ? "bg-purple-500"
+                    : "bg-white border border-gray-200"
+                } px-4 py-1 rounded-full items-center`}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedCollection(collection.value);
+                }}
+              >
+                <Text
+                  className={`font-sora text-xs ${
+                    selectedCollection === collection.value
+                      ? "text-white"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {collection.icon} {collection.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Save Button */}
+        <TouchableOpacity
+          className={`${
+            isSaving ? "bg-gray-400" : "bg-blue-500"
+          } rounded-lg py-3`}
+          onPress={handleSaveMoment}
+          disabled={isSaving}
+        >
+          <Text className="text-white text-center font-sora-bold text-lg">
+            {isSaving ? "Saving..." : "Save Moment"}
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

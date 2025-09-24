@@ -95,6 +95,17 @@ export class MomentService {
     }
   }
 
+  // Get moments by collection
+  static async getMomentsByCollection(collection: string): Promise<Moment[]> {
+    try {
+      const moments = await this.getMoments();
+      return moments.filter((moment) => moment.collection === collection);
+    } catch (error) {
+      console.error("Error getting moments by collection:", error);
+      return [];
+    }
+  }
+
   // Search moments
   static async searchMoments(query: string): Promise<Moment[]> {
     try {
@@ -144,6 +155,7 @@ export class MomentService {
     momentsThisWeek: number;
     momentsThisMonth: number;
     categoryCounts: Record<string, number>;
+    collectionCounts: Record<string, number>;
   }> {
     try {
       const moments = await this.getMoments();
@@ -159,9 +171,14 @@ export class MomentService {
       ).length;
 
       const categoryCounts: Record<string, number> = {};
+      const collectionCounts: Record<string, number> = {};
       moments.forEach((moment) => {
         categoryCounts[moment.category] =
           (categoryCounts[moment.category] || 0) + 1;
+        if (moment.collection) {
+          collectionCounts[moment.collection] =
+            (collectionCounts[moment.collection] || 0) + 1;
+        }
       });
 
       return {
@@ -169,6 +186,7 @@ export class MomentService {
         momentsThisWeek,
         momentsThisMonth,
         categoryCounts,
+        collectionCounts,
       };
     } catch (error) {
       console.error("Error getting moment stats:", error);
@@ -177,6 +195,7 @@ export class MomentService {
         momentsThisWeek: 0,
         momentsThisMonth: 0,
         categoryCounts: {},
+        collectionCounts: {},
       };
     }
   }
