@@ -14,7 +14,8 @@
         "NSCameraUsageDescription": "This app needs access to camera to capture photos and videos for your moments.",
         "NSMicrophoneUsageDescription": "This app needs access to microphone to record audio for your moments.",
         "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select photos and videos for your moments."
-      }
+      },
+      "bundleIdentifier": "com.sadique-x.MadeMeSmile"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +30,8 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {

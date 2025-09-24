@@ -36,16 +36,7 @@ export default function TabsLayout() {
           href: null, // Hide this tab from the tab bar
         }}
       />
-      <Tabs.Screen
-        name="timeline"
-        options={{
-          title: "Timeline",
-          href: null,
-          tabBarIcon: ({ color, size }) => (
-            <HugeiconsIcon icon={Home05Icon} size={size} color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="memories"
         options={{
@@ -70,6 +61,17 @@ export default function TabsLayout() {
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="timeline"
+        options={{
+          title: "Timeline",
+          href: null,
+          tabBarIcon: ({ color, size }) => (
+            <HugeiconsIcon icon={Home05Icon} size={size} color={color} />
           ),
         }}
       />
