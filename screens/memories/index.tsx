@@ -1,3 +1,5 @@
+import { Container } from "@/components/ui/container";
+import ScreenHeader from "@/components/ui/screen-header";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -125,81 +127,94 @@ export default function MemoriesComponent() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {/* Category Filter */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="px-4 py-4"
-      >
-        <View className="flex-row gap-3">
-          <TouchableOpacity
-            className={`${
-              selectedCategory === "all"
-                ? "bg-blue-500"
-                : "bg-white border border-gray-200"
-            } rounded-full px-4 py-2`}
-            onPress={() => setSelectedCategory("all")}
-          >
-            <Text
-              className={`font-sora-medium ${
-                selectedCategory === "all" ? "text-white" : "text-gray-600"
-              }`}
-            >
-              All
-            </Text>
-          </TouchableOpacity>
-
-          {categories.map((category) => (
+    <>
+      <ScreenHeader title="Memories" />
+      <Container>
+        {/* Category Filter Chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 4 }}
+        >
+          <View className="flex-row gap-2 bg-red-200">
             <TouchableOpacity
-              key={category.id}
               className={`${
-                selectedCategory === category.id
-                  ? "bg-blue-500"
-                  : "bg-white border border-gray-200"
-              } rounded-full px-4 py-2 flex-row items-center`}
-              onPress={() => setSelectedCategory(category.id)}
+                selectedCategory === "all"
+                  ? "bg-blue-500 shadow-sm"
+                  : "bg-white border border-gray-300 shadow-sm"
+              } rounded-full px-4 py-2.5 flex-row items-center`}
+              onPress={() => setSelectedCategory("all")}
+              style={{
+                shadowColor: selectedCategory === "all" ? "#3B82F6" : "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
+              }}
             >
-              {/* <Ionicons
-                name={category.icon as any}
-                size={16}
-                color={selectedCategory === category.id ? "white" : "#6B7280"}
-              /> */}
               <Text
-                className={`ml-2 font-sora-medium ${
-                  selectedCategory === category.id
-                    ? "text-white"
-                    : "text-gray-600"
+                className={`font-sora-medium text-sm ${
+                  selectedCategory === "all" ? "text-white" : "text-gray-700"
                 }`}
               >
-                {category.name}
+                All
               </Text>
             </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
 
-      {/* Bento Grid */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      >
-        {filteredMoments.length === 0 ? (
-          <View className="flex-1 items-center justify-center py-20">
-            <Ionicons name="heart-outline" size={64} color="#9CA3AF" />
-            <Text className="font-sora-bold text-gray-900 text-xl mt-4 mb-2">
-              No memories yet
-            </Text>
-            <Text className="font-sora text-gray-600 text-center px-8">
-              {selectedCategory === "all"
-                ? "Start creating moments to see them here!"
-                : `No ${selectedCategory} memories yet. Try adding some!`}
-            </Text>
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                className={`${
+                  selectedCategory === category.id
+                    ? "bg-blue-500 shadow-sm"
+                    : "bg-white border border-gray-300 shadow-sm"
+                } rounded-full px-4 py-2.5 flex-row items-center`}
+                onPress={() => setSelectedCategory(category.id)}
+                style={{
+                  shadowColor:
+                    selectedCategory === category.id ? "#3B82F6" : "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 2,
+                  elevation: 2,
+                }}
+              >
+                <Text
+                  className={`font-sora-medium text-sm ${
+                    selectedCategory === category.id
+                      ? "text-white"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        ) : (
-          renderBentoGrid()
-        )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+
+        {/* Bento Grid */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        >
+          {filteredMoments.length === 0 ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <Ionicons name="heart-outline" size={64} color="#9CA3AF" />
+              <Text className="font-sora-bold text-gray-900 text-xl mt-4 mb-2">
+                No memories yet
+              </Text>
+              <Text className="font-sora text-gray-600 text-center px-8">
+                {selectedCategory === "all"
+                  ? "Start creating moments to see them here!"
+                  : `No ${selectedCategory} memories yet. Try adding some!`}
+              </Text>
+            </View>
+          ) : (
+            renderBentoGrid()
+          )}
+        </ScrollView>
+      </Container>
+    </>
   );
 }
