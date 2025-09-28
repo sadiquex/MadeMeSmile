@@ -1,5 +1,5 @@
 import { Container } from "@/components/ui/container";
-import ScreenHeader from "@/components/ui/screen-header";
+import ScreenHeader, { HeaderHeightSpace } from "@/components/ui/screen-header";
 import { Ionicons } from "@expo/vector-icons";
 import { Camera01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
@@ -23,6 +23,7 @@ import {
   DEFAULT_CATEGORIES,
   MOOD_OPTIONS,
 } from "../../types";
+import SaveToCollectionModal from "./save-to-collection-modal";
 
 export default function AddMoment() {
   const [content, setContent] = useState("");
@@ -33,6 +34,7 @@ export default function AddMoment() {
   const [newTag, setNewTag] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [mediaFile, setMediaFile] = useState<MediaFile | null>(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const handleSaveMoment = async () => {
@@ -104,6 +106,20 @@ export default function AddMoment() {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
+  const handleCollectionSelect = (collection: string) => {
+    setSelectedCollection(collection);
+    setShowCollectionModal(false);
+  };
+
+  const getSelectedCollectionLabel = () => {
+    const collection = COLLECTION_OPTIONS.find(
+      (c) => c.value === selectedCollection
+    );
+    return collection
+      ? `${collection.icon} ${collection.label}`
+      : "Add to Collection";
+  };
+
   return (
     <>
       <ScreenHeader title="Add Moment" />
@@ -122,6 +138,8 @@ export default function AddMoment() {
             showsVerticalScrollIndicator={false}
             automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
           >
+            <HeaderHeightSpace style={{ height: 110 }} />
+
             <View className="gap-4">
               <View className="">
                 <Text className="font-sora-medium text-gray-900 mb-3">
@@ -333,35 +351,33 @@ export default function AddMoment() {
 
               {/* Collection Selection */}
               <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
-                  Save to Collection (optional)
-                </Text>
-                <View className="flex-row flex-wrap gap-3">
-                  {COLLECTION_OPTIONS.map((collection) => (
-                    <TouchableOpacity
-                      key={collection.value}
-                      className={`${
-                        selectedCollection === collection.value
-                          ? "bg-purple-500"
-                          : "bg-white border border-gray-200"
-                      } px-4 py-1 rounded-full items-center`}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setSelectedCollection(collection.value);
-                      }}
-                    >
-                      <Text
-                        className={`font-sora text-xs ${
-                          selectedCollection === collection.value
-                            ? "text-white"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {collection.icon} {collection.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                {/* <Text className="font-sora-medium text-gray-900 mb-3">
+                  Add to Collection (optional)
+                </Text> */}
+                <TouchableOpacity
+                  className={`w-full ${
+                    selectedCollection
+                      ? "text-gray-900"
+                      : "border border-gray-200"
+                  } rounded-lg px-4 py-3 flex-row items-center justify-between border border-gray-200`}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowCollectionModal(true);
+                  }}
+                >
+                  <Text
+                    className={`font-sora text-sm ${
+                      selectedCollection ? "text-gray-900" : "text-gray-600"
+                    }`}
+                  >
+                    {getSelectedCollectionLabel()}
+                  </Text>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={16}
+                    color={selectedCollection ? "#6B7280" : "#6B7280"}
+                  />
+                </TouchableOpacity>
               </View>
 
               {/* Save Button */}
@@ -380,6 +396,14 @@ export default function AddMoment() {
           </ScrollView>
         </Container>
       </KeyboardAvoidingView>
+
+      {/* Collection Modal */}
+      <SaveToCollectionModal
+        isVisible={showCollectionModal}
+        onClose={() => setShowCollectionModal(false)}
+        onSelectCollection={handleCollectionSelect}
+        selectedCollection={selectedCollection}
+      />
     </>
   );
 }

@@ -5,7 +5,7 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import React, { useEffect, useRef } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface BottomModalProps {
   children: React.ReactNode;
@@ -77,19 +77,8 @@ const BottomModal = ({
       enableDynamicSizing={false}
     >
       <BottomSheetView style={styles.contentContainer}>
-        <View className="mb-[16px] flex-row items-center justify-between">
-          <View className="flex-1 bg-gray-200" />
-          <View className="h-[5px] w-[53px] rounded-[8px] bg-[#A7A9AF]" />
-          <View className="flex-1 flex-row items-center justify-end">
-            {showCloseButton && (
-              <TouchableOpacity
-                className="h-[32px] w-[32px] items-center justify-center rounded-[32px] bg-[#EBEBEB]"
-                onPress={closeModal}
-              >
-                <Text className="text-[#666] font-semibold">×</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+        <View className="mb-[16px] flex-row items-center justify-center">
+          <View className="h-[5px] w-[40px] rounded-[8px] bg-[#A7A9AF]" />
         </View>
 
         {title && (
