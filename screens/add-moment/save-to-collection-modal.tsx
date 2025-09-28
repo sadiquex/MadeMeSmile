@@ -51,7 +51,7 @@ export default function SaveToCollectionModal({
                 onPress={() => handleSelectCollection(collection.value)}
                 className={`items-center rounded-xl border-2 p-4 w-[100px] min-h-[120px] justify-center ${
                   localSelectedCollection === collection.value
-                    ? "border-blue-500 bg-blue-50"
+                    ? "border-primary bg-primary/10"
                     : "border-gray-200 bg-white"
                 }`}
               >
@@ -60,7 +60,7 @@ export default function SaveToCollectionModal({
                   {collection.label}
                 </Text>
                 {localSelectedCollection === collection.value && (
-                  <View className="absolute top-2 right-2 h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+                  <View className="absolute top-2 right-2 h-5 w-5 items-center justify-center rounded-full bg-primary">
                     <Text className="text-white text-xs">✓</Text>
                   </View>
                 )}
@@ -73,7 +73,7 @@ export default function SaveToCollectionModal({
         {isDetailsScreen && (
           <View className="mt-4">
             <TouchableOpacity
-              className="bg-blue-500 rounded-lg py-3"
+              className="bg-primary rounded-lg py-3"
               onPress={() => {
                 // onSaveToCollection();
                 onClose?.();

@@ -30,7 +30,7 @@ const onboardingData: OnboardingSlide[] = [
     description:
       "Preserve the beautiful moments that make you smile. From family gatherings to quiet moments of joy, capture them all.",
     backgroundImage:
-      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800&h=1200&fit=crop",
+      "https://images.pexels.com/photos/7551762/pexels-photo-7551762.jpeg",
     gradientColors: [
       "rgba(239, 68, 68, 0.8)",
       "rgba(239, 68, 68, 0.4)",
@@ -44,7 +44,7 @@ const onboardingData: OnboardingSlide[] = [
     description:
       "Categorize your moments by family, friends, work, or any theme that matters to you. Find your memories instantly.",
     backgroundImage:
-      "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&h=1200&fit=crop",
+      "https://images.pexels.com/photos/23383655/pexels-photo-23383655.jpeg",
     gradientColors: [
       "rgba(34, 197, 94, 0.8)",
       "rgba(34, 197, 94, 0.4)",
@@ -58,7 +58,7 @@ const onboardingData: OnboardingSlide[] = [
     description:
       "Share your favorite moments with loved ones or keep them private. Your memories, your way.",
     backgroundImage:
-      "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=1200&fit=crop",
+      "https://images.pexels.com/photos/1320701/pexels-photo-1320701.jpeg",
     gradientColors: [
       "rgba(59, 130, 246, 0.8)",
       "rgba(59, 130, 246, 0.4)",
@@ -115,20 +115,51 @@ export default function OnboardingScreen() {
               className="flex-1"
               resizeMode="cover"
             >
-              <LinearGradient colors={slide.gradientColors} className="flex-1">
-                <View className="flex-1 justify-center px-8">
-                  <Text className="font-sora-bold text-blue-500 text-4xl mb-4 text-center">
-                    {/* {slide.title} */}
-                    asdfasdf
-                  </Text>
-                  <Text className="font-sora-medium text-white text-xl mb-6 text-center opacity-90">
-                    {slide.subtitle}
-                  </Text>
-                  <Text className="font-sora text-white text-lg text-center leading-7 opacity-80">
-                    {slide.description}
-                  </Text>
-                </View>
-              </LinearGradient>
+              <LinearGradient
+                // colors={slide.gradientColors}
+                // rgba transparent to black
+                colors={["transparent", "rgba(0, 0, 0, 0.8)"]}
+                className="flex-1"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                }}
+              />
+              <View className="flex-1 justify-end mb-[200px] px-8 gap-2">
+                <Text
+                  className="font-sora-bold text-red-400 text-3xl text-center"
+                  style={{
+                    textShadowColor: "rgba(0, 0, 0, 0.8)",
+                    textShadowOffset: { width: 1, height: 1 },
+                    textShadowRadius: 3,
+                  }}
+                >
+                  {slide.title}
+                </Text>
+                <Text
+                  className="font-sora-medium text-white text-xl text-center"
+                  style={{
+                    textShadowColor: "rgba(0, 0, 0, 0.8)",
+                    textShadowOffset: { width: 1, height: 1 },
+                    textShadowRadius: 3,
+                  }}
+                >
+                  {slide.subtitle}
+                </Text>
+                <Text
+                  className="font-sora text-white text-base text-center"
+                  style={{
+                    textShadowColor: "rgba(0, 0, 0, 0.8)",
+                    textShadowOffset: { width: 1, height: 1 },
+                    textShadowRadius: 3,
+                  }}
+                >
+                  {slide.description}
+                </Text>
+              </View>
             </ImageBackground>
           </View>
         ))}
@@ -161,9 +192,9 @@ export default function OnboardingScreen() {
 
           <TouchableOpacity
             onPress={handleNext}
-            className="bg-white rounded-full px-8 py-4"
+            className="bg-red-400 rounded-full px-8 py-4"
           >
-            <Text className="font-sora-bold text-gray-900 text-lg">
+            <Text className="font-sora-bold text-white text-lg">
               {currentIndex === onboardingData.length - 1
                 ? "Get Started"
                 : "Next"}

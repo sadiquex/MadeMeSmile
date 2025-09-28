@@ -1,3 +1,7 @@
+import CustomButton from "@/components/ui/custom-button";
+import CustomInput from "@/components/ui/custom-input";
+import { CameraSmile01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -6,7 +10,6 @@ import {
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -41,8 +44,14 @@ export default function LoginScreen() {
       >
         <View className="flex-1 bg-white px-6">
           <View className="flex-1 justify-center">
-            <View className="mb-8">
-              <Text className="text-3xl font-sora-bold text-gray-900 mb-2">
+            <View className="mb-8 flex flex-col gap-2">
+              <HugeiconsIcon
+                icon={CameraSmile01Icon}
+                size={60}
+                color="#f87171"
+              />
+
+              <Text className="text-3xl font-sora-bold text-gray-900">
                 Welcome Back
               </Text>
               <Text className="text-gray-600 font-sora">
@@ -50,51 +59,33 @@ export default function LoginScreen() {
               </Text>
             </View>
 
-            <View className="space-y-4">
-              <View>
-                <Text className="text-gray-700 font-sora-medium mb-2">
-                  Email
-                </Text>
-                <TextInput
-                  className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-sora"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  returnKeyType="next"
-                />
-              </View>
+            <View className="flex gap-4">
+              <CustomInput
+                label="Email"
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                returnKeyType="next"
+              />
 
-              <View>
-                <Text className="text-gray-700 font-sora-medium mb-2">
-                  Password
-                </Text>
-                <TextInput
-                  className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-sora"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
-                />
-              </View>
+              <CustomInput
+                label="Password"
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
+              />
+
+              <CustomButton title="Sign In" onPress={handleLogin} />
 
               <TouchableOpacity
-                className="bg-blue-500 rounded-lg py-4 mt-6"
-                onPress={handleLogin}
-              >
-                <Text className="text-white text-center font-sora-bold text-lg">
-                  Sign In
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="mt-4"
                 onPress={() => router.push("/(auth)/forgot-password")}
               >
-                <Text className="text-blue-500 text-center">
+                <Text className="text-primary text-center">
                   Forgot Password?
                 </Text>
               </TouchableOpacity>
@@ -105,7 +96,7 @@ export default function LoginScreen() {
             <Text className="text-gray-600 text-center">
               Don&apos;t have an account?{" "}
               <Text
-                className="text-blue-500 font-semibold"
+                className="text-primary font-semibold"
                 onPress={() => router.push("/(auth)/register")}
               >
                 Sign Up

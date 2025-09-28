@@ -1,4 +1,5 @@
 import { Container } from "@/components/ui/container";
+import CustomButton from "@/components/ui/custom-button";
 import ScreenHeader, { HeaderHeightSpace } from "@/components/ui/screen-header";
 import { Ionicons } from "@expo/vector-icons";
 import { Camera01Icon } from "@hugeicons/core-free-icons";
@@ -32,7 +33,7 @@ export default function AddMoment() {
   const [selectedCollection, setSelectedCollection] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+
   const [mediaFile, setMediaFile] = useState<MediaFile | null>(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -43,7 +44,6 @@ export default function AddMoment() {
       return;
     }
 
-    setIsSaving(true);
     try {
       await MomentService.saveMoment({
         content: content.trim(),
@@ -75,7 +75,6 @@ export default function AddMoment() {
       console.error("Error saving moment:", error);
       Alert.alert("Error", "Failed to save your moment. Please try again.");
     } finally {
-      setIsSaving(false);
     }
   };
 
@@ -248,7 +247,7 @@ export default function AddMoment() {
                     autoCapitalize="none"
                   />
                   <TouchableOpacity
-                    className="ml-3 bg-blue-500 rounded-lg px-4 py-3"
+                    className="ml-3 bg-primary rounded-lg px-4 py-3"
                     onPress={addTag}
                   >
                     <Ionicons name="add" size={20} color="white" />
@@ -380,18 +379,7 @@ export default function AddMoment() {
                 </TouchableOpacity>
               </View>
 
-              {/* Save Button */}
-              <TouchableOpacity
-                className={`${
-                  isSaving ? "bg-gray-400" : "bg-blue-500"
-                } rounded-lg py-3`}
-                onPress={handleSaveMoment}
-                disabled={isSaving}
-              >
-                <Text className="text-white text-center font-sora-bold text-lg">
-                  {isSaving ? "Saving..." : "Save Moment"}
-                </Text>
-              </TouchableOpacity>
+              <CustomButton title="Save Moment" onPress={handleSaveMoment} />
             </View>
           </ScrollView>
         </Container>

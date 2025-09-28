@@ -8,6 +8,9 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      colors: {
+        primary: "#f87171",
+      },
       fontFamily: {
         sora: ["Sora_400Regular"],
         "sora-medium": ["Sora_600SemiBold"],
