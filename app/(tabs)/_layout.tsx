@@ -3,8 +3,8 @@ import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 export default function TabsLayout() {
   return (
     <NativeTabs>
-      <NativeTabs.Trigger name="memories">
-        <Label>Memories</Label>
+      <NativeTabs.Trigger name="moments">
+        <Label>Moments</Label>
         <Icon sf="heart.fill" drawable="ic_menu_mylocation" />
       </NativeTabs.Trigger>
       {/* 
@@ -50,9 +50,9 @@ export default function TabsLayout() {
 //       />
 
 //       <Tabs.Screen
-//         name="memories"
+//         name="moments"
 //         options={{
-//           title: "Memories",
+//           title: "Moments",
 //           tabBarIcon: ({ color, size }) => (
 //             <HugeiconsIcon icon={FavouriteIcon} size={size} color={color} />
 //           ),

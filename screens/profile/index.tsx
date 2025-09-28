@@ -56,6 +56,8 @@ export default function ProfileScreenComponent() {
       <ScreenHeader title="Profile" />
 
       <ScrollView className="flex-1 bg-gray-50">
+        {/* <HeaderHeightSpace style={{ height: 110 }} /> */}
+
         <View className="px-4 py-6">
           {/* Profile Header */}
           <View className="bg-white rounded-lg p-6 mb-6">
