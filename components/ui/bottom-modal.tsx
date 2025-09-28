@@ -83,7 +83,7 @@ const BottomModal = ({
 
         {title && (
           <View className="mb-4">
-            <Text className="text-lg font-semibold text-center text-gray-800">
+            <Text className="text-lg font-sora-medium text-center text-gray-800">
               {title}
             </Text>
           </View>

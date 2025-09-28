@@ -1,4 +1,5 @@
-import ScreenHeader from "@/components/ui/screen-header";
+import ScreenHeader, { HeaderHeightSpace } from "@/components/ui/screen-header";
+import SmilesStreaksChart from "@/screens/profile/smiles-streaks-chart";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -53,23 +54,23 @@ export default function ProfileScreenComponent() {
 
   return (
     <>
-      <ScreenHeader title="Profile" />
+      <ScreenHeader title="Ibrahim Saddik" />
 
-      <ScrollView className="flex-1 bg-gray-50">
-        {/* <HeaderHeightSpace style={{ height: 110 }} /> */}
+      <ScrollView className="flex-1">
+        <HeaderHeightSpace style={{ height: 40 }} />
 
         <View className="px-4 py-6">
           {/* Profile Header */}
-          <View className="bg-white rounded-lg p-6 mb-6">
+          <View className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
             <View className="items-center">
               <View className="w-20 h-20 bg-blue-500 rounded-full items-center justify-center mb-4">
                 <Ionicons name="person" size={40} color="white" />
               </View>
-              <Text className="text-xl font-sora-bold text-gray-900 mb-1">
-                John Doe
-              </Text>
+              {/* <Text className="text-xl font-sora-bold text-gray-900 mb-1">
+                Ibrahim Saddik
+              </Text> */}
               <Text className="font-sora text-gray-600 mb-4">
-                john.doe@example.com
+                ibrahim.saddik@example.com
               </Text>
 
               {/* Stats */}
@@ -101,6 +102,14 @@ export default function ProfileScreenComponent() {
               </View>
             </View>
           </View>
+
+          {/* Smiles Streaks Chart */}
+          <SmilesStreaksChart
+            onCellPress={(date, count) => {
+              console.log(`Date: ${date}, Smiles: ${count}`);
+              // TODO: Navigate to day's moments or show details
+            }}
+          />
 
           {/* Category Breakdown */}
           {Object.keys(stats.categoryCounts).length > 0 && (

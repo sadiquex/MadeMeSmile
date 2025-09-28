@@ -7,7 +7,8 @@ export default function SplashScreen() {
     // Simulate loading time
     const timer = setTimeout(() => {
       // Navigate to login after splash
-      router.replace("/(auth)/login");
+      // router.replace("/(auth)/login");
+      router.replace("/(auth)/onboarding");
     }, 2000);
 
     return () => clearTimeout(timer);

@@ -1,16 +1,39 @@
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { Image, Text, View } from "react-native";
 
 export default function SplashScreen() {
   useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      // Navigate to login after splash
-      router.replace("/(auth)/login");
-    }, 2000);
+    const checkOnboardingStatus = async () => {
+      try {
+        // Check if user has completed onboarding
+        // const hasCompletedOnboarding = await AsyncStorage.getItem(
+        //   "hasCompletedOnboarding"
+        // );
 
-    return () => clearTimeout(timer);
+        const hasCompletedOnboarding = false;
+
+        // Simulate loading time
+        setTimeout(() => {
+          if (hasCompletedOnboarding) {
+            // User has completed onboarding, go to login
+            router.replace("/(auth)/login");
+          } else {
+            // First time user, show onboarding
+            router.replace("/(auth)/onboarding");
+          }
+        }, 2000);
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        // Default to onboarding if there's an error
+        setTimeout(() => {
+          router.replace("/(auth)/onboarding");
+        }, 2000);
+      }
+    };
+
+    checkOnboardingStatus();
   }, []);
 
   return (

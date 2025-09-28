@@ -1,14 +1,23 @@
 import { Container } from "@/components/ui/container";
 import ScreenHeader, { HeaderHeightSpace } from "@/components/ui/screen-header";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useRef, useState } from "react";
+import {
+  Animated,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Category, Moment } from "../../types";
 import { DUMMY_CATEGORIES, DUMMY_MOMENTS } from "./dummy-data";
 import SmileCard from "./smile-card";
 
 export default function MomentsComponent() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const router = useRouter();
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const filteredMoments =
     selectedCategory === "all"
@@ -19,10 +28,14 @@ export default function MomentsComponent() {
 
   const renderMomentsList = () => {
     return filteredMoments.map((moment: Moment) => (
-      <View key={moment.id} className="mb-4">
+      <View key={moment.id} className="mb-4 pb-[90px]">
         <SmileCard moment={moment} />
       </View>
     ));
+  };
+
+  const handleAddMoment = () => {
+    router.push("/(tabs)/add-moment");
   };
 
   return (
@@ -30,7 +43,13 @@ export default function MomentsComponent() {
       <ScreenHeader title="Moments" />
 
       <Container>
-        <ScrollView>
+        <ScrollView
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          scrollEventThrottle={16}
+        >
           {/* empty space to prevent header from covering the content */}
           <HeaderHeightSpace style={{ height: 110 }} />
 
@@ -45,7 +64,7 @@ export default function MomentsComponent() {
               <TouchableOpacity
                 className={`${
                   selectedCategory === "all"
-                    ? "bg-blue-500"
+                    ? "bg-red-500"
                     : "bg-white border border-gray-300"
                 } rounded-full px-4 py-2.5 flex-row items-center`}
                 onPress={() => setSelectedCategory("all")}
@@ -64,7 +83,7 @@ export default function MomentsComponent() {
                   key={category.id}
                   className={`${
                     selectedCategory === category.id
-                      ? "bg-blue-500"
+                      ? "bg-red-500"
                       : "bg-white border border-gray-300"
                   } rounded-full px-4 py-2.5 flex-row items-center`}
                   onPress={() => setSelectedCategory(category.id)}
@@ -103,6 +122,27 @@ export default function MomentsComponent() {
           </ScrollView>
         </ScrollView>
       </Container>
+
+      {/* Floating Add Button */}
+      <Animated.View
+        style={{
+          position: "absolute",
+          bottom: 100,
+          right: 20,
+          opacity: scrollY.interpolate({
+            inputRange: [0, 100],
+            outputRange: [1, 0.3],
+            extrapolate: "clamp",
+          }),
+        }}
+      >
+        <TouchableOpacity
+          onPress={handleAddMoment}
+          className="h-14 w-14 items-center justify-center rounded-2xl bg-red-500 shadow-lg"
+        >
+          <Ionicons name="add" size={28} color="white" />
+        </TouchableOpacity>
+      </Animated.View>
     </>
   );
 }

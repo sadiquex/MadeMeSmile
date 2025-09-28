@@ -8,6 +8,7 @@ interface SaveToCollectionModalProps {
   onClose?: () => void;
   onSelectCollection?: (collection: string) => void;
   selectedCollection?: string;
+  isDetailsScreen?: boolean;
 }
 
 export default function SaveToCollectionModal({
@@ -15,6 +16,7 @@ export default function SaveToCollectionModal({
   onClose,
   onSelectCollection,
   selectedCollection,
+  isDetailsScreen = false,
 }: SaveToCollectionModalProps) {
   const [localSelectedCollection, setLocalSelectedCollection] = useState(
     selectedCollection || ""
@@ -30,7 +32,9 @@ export default function SaveToCollectionModal({
       isVisible={isVisible}
       onClose={onClose}
       title="Add to Collection"
-      snapPoints={["30%"]}
+      //   snapPoints={["30%"]}
+      // if is details screen, then snap points should be 100%
+      snapPoints={isDetailsScreen ? ["34%"] : ["30%"]}
     >
       <View className="flex-1">
         {/* horizontal scroll */}
@@ -64,6 +68,23 @@ export default function SaveToCollectionModal({
             ))}
           </View>
         </ScrollView>
+
+        {/* Save Button - Only show on details screen */}
+        {isDetailsScreen && (
+          <View className="mt-4">
+            <TouchableOpacity
+              className="bg-blue-500 rounded-lg py-3"
+              onPress={() => {
+                // onSaveToCollection();
+                onClose?.();
+              }}
+            >
+              <Text className="text-white text-center font-sora-bold text-lg">
+                Save
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </BottomModal>
   );
