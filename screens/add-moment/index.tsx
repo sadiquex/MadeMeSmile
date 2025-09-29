@@ -139,142 +139,13 @@ export default function AddMoment() {
           >
             <HeaderHeightSpace style={{ height: 110 }} />
 
-            <View className="gap-4">
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
-                  Tell us about your moment
-                </Text>
-                <View className="bg-white rounded-lg p-4 border border-gray-200">
-                  <TextInput
-                    className="font-sora text-gray-900 min-h-[30px] text-base"
-                    placeholder="Share what made you smile today..."
-                    value={content}
-                    onChangeText={setContent}
-                    multiline
-                    textAlignVertical="top"
-                    maxLength={280}
-                    returnKeyType="default"
-                    blurOnSubmit={false}
-                  />
-                  <Text className="font-sora text-gray-400 text-xs mt-2 text-right">
-                    {content.length}/280
-                  </Text>
-                </View>
-              </View>
-
-              {/* Category Selection */}
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
-                  Category
-                </Text>
-                <View className="flex-row flex-wrap gap-3">
-                  {DEFAULT_CATEGORIES.map((category) => (
-                    <TouchableOpacity
-                      key={category.id}
-                      className={`${
-                        selectedCategory === category.id
-                          ? "bg-yellow-400"
-                          : "bg-white border border-gray-200"
-                      } px-4 py-1 rounded-full items-center`}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setSelectedCategory(category.id);
-                      }}
-                    >
-                      <Text
-                        className={`font-sora text-xs ${
-                          selectedCategory === category.id
-                            ? "text-gray-900"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {category.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              {/* Mood Selection */}
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
-                  How are you feeling?
-                </Text>
-                <View className="flex-row flex-wrap gap-3">
-                  {MOOD_OPTIONS.map((mood) => (
-                    <TouchableOpacity
-                      key={mood.id}
-                      className={`${
-                        selectedMood === mood.id
-                          ? "bg-yellow-400"
-                          : "bg-white border border-gray-200"
-                      } rounded-lg px-4 py-3 items-center`}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setSelectedMood(mood.id);
-                      }}
-                    >
-                      <Text className="text-2xl mb-1">{mood.emoji}</Text>
-                      <Text
-                        className={`font-sora text-xs ${
-                          selectedMood === mood.id
-                            ? "text-gray-800"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {mood.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              {/* Tags */}
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
-                  Hashtags? (Optional)
-                </Text>
-
-                {/* Add Tag Input */}
-                <View className="flex-row items-center mb-3">
-                  <TextInput
-                    className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 font-sora text-gray-900"
-                    placeholder="Add some hashtags..."
-                    value={newTag}
-                    onChangeText={setNewTag}
-                    onSubmitEditing={addTag}
-                    returnKeyType="done"
-                    autoCapitalize="none"
-                  />
-                  <TouchableOpacity
-                    className="ml-3 bg-primary rounded-lg px-4 py-3"
-                    onPress={addTag}
-                  >
-                    <Ionicons name="add" size={20} color="white" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Display Tags */}
-                {tags.length > 0 && (
-                  <View className="flex-row flex-wrap gap-2">
-                    {tags.map((tag, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        className="bg-blue-100 rounded-full px-3 py-2 flex-row items-center"
-                        onPress={() => removeTag(tag)}
-                      >
-                        <Text className="font-sora text-blue-600 text-sm mr-2">
-                          #{tag}
-                        </Text>
-                        <Ionicons name="close" size={14} color="#3B82F6" />
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
+            <View className="gap-4 mb-16">
               {/* Media Section */}
               <View className="">
+                <Text className="font-sora-medium text-gray-900 mb-3">
+                  Media
+                </Text>
+
                 {mediaFile ? (
                   <View className="bg-white rounded-lg p-4 border border-gray-200">
                     <View className="flex-row items-center justify-between mb-3">
@@ -341,10 +212,144 @@ export default function AddMoment() {
                     <Text className="font-sora-medium text-gray-700 mt-2">
                       Add Photo, Video, or Audio
                     </Text>
-                    {/* <Text className="font-sora text-gray-500 text-sm mt-1">
-                Tap to capture or choose from gallery
-              </Text> */}
+                    <Text className="font-sora text-gray-500 text-sm mt-1">
+                      Tap to capture or choose from gallery
+                    </Text>
                   </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Description */}
+              <View className="">
+                <Text className="font-sora-medium text-gray-900 mb-3">
+                  What made you smile?
+                </Text>
+                <View className="bg-white rounded-lg p-4 border border-gray-200">
+                  <TextInput
+                    className="font-sora text-gray-900 min-h-[30px] text-base"
+                    placeholder="Share what made you smile today..."
+                    value={content}
+                    onChangeText={setContent}
+                    multiline
+                    textAlignVertical="top"
+                    maxLength={280}
+                    returnKeyType="default"
+                    blurOnSubmit={false}
+                  />
+                  <Text className="font-sora text-gray-400 text-xs mt-2 text-right">
+                    {content.length}/280
+                  </Text>
+                </View>
+              </View>
+
+              {/* Category Selection */}
+              <View className="">
+                <Text className="font-sora-medium text-gray-900 mb-3">
+                  Category
+                </Text>
+                <View className="flex-row flex-wrap gap-3">
+                  {DEFAULT_CATEGORIES.map((category) => (
+                    <TouchableOpacity
+                      key={category.id}
+                      className={`${
+                        selectedCategory === category.id
+                          ? "bg-primary"
+                          : "bg-white border border-gray-200"
+                      } px-4 py-1 rounded-full items-center`}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setSelectedCategory(category.id);
+                      }}
+                    >
+                      <Text
+                        className={`font-sora text-xs ${
+                          selectedCategory === category.id
+                            ? "text-white"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {category.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Mood Selection */}
+              <View className="">
+                <Text className="font-sora-medium text-gray-900 mb-3">
+                  How are you feeling?
+                </Text>
+                <View className="flex-row flex-wrap gap-3">
+                  {MOOD_OPTIONS.map((mood) => (
+                    <TouchableOpacity
+                      key={mood.id}
+                      className={`${
+                        selectedMood === mood.id
+                          ? "bg-primary"
+                          : "bg-white border border-gray-200"
+                      } rounded-lg px-4 py-3 items-center`}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setSelectedMood(mood.id);
+                      }}
+                    >
+                      <Text className="text-2xl mb-1">{mood.emoji}</Text>
+                      <Text
+                        className={`font-sora text-xs ${
+                          selectedMood === mood.id
+                            ? "text-white"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {mood.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Tags */}
+              <View className="">
+                <Text className="font-sora-medium text-gray-900 mb-3">
+                  Hashtags? (Optional)
+                </Text>
+
+                {/* Add Tag Input */}
+                <View className="flex-row items-center mb-3">
+                  <TextInput
+                    className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 font-sora text-gray-900"
+                    placeholder="Add some hashtags..."
+                    value={newTag}
+                    onChangeText={setNewTag}
+                    onSubmitEditing={addTag}
+                    returnKeyType="done"
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity
+                    className="ml-3 bg-primary rounded-lg px-4 py-3"
+                    onPress={addTag}
+                  >
+                    <Ionicons name="add" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Display Tags */}
+                {tags.length > 0 && (
+                  <View className="flex-row flex-wrap gap-2">
+                    {tags.map((tag, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        className="bg-blue-100 rounded-full px-3 py-2 flex-row items-center"
+                        onPress={() => removeTag(tag)}
+                      >
+                        <Text className="font-sora text-blue-600 text-sm mr-2">
+                          #{tag}
+                        </Text>
+                        <Ionicons name="close" size={14} color="#3B82F6" />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 )}
               </View>
 

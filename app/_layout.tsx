@@ -1,3 +1,4 @@
+import toastConfig from "@/lib/ToastConfig";
 import {
   Sora_400Regular,
   Sora_600SemiBold,
@@ -10,6 +11,7 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
+import Toast from "react-native-toast-message";
 import "../global.css";
 
 // Verify NativeWind installation
@@ -46,6 +48,7 @@ export default function RootLayout() {
         </Stack>
         <StatusBar style="auto" />
       </BottomSheetModalProvider>
+      <Toast config={toastConfig} />
     </GestureHandlerRootView>
   );
 }

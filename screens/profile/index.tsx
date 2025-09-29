@@ -61,41 +61,37 @@ export default function ProfileScreenComponent() {
 
         <View className="px-4 py-6">
           {/* Profile Header */}
-          <View className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-            <View className="items-center">
-              <View className="w-20 h-20 bg-blue-500 rounded-full items-center justify-center mb-4">
-                <Ionicons name="person" size={40} color="white" />
-              </View>
-              {/* <Text className="text-xl font-sora-bold text-gray-900 mb-1">
-                Ibrahim Saddik
-              </Text> */}
-              <Text className="font-sora text-gray-600 mb-4">
-                ibrahim.saddik@example.com
-              </Text>
+          <View className="bg-white border border-gray-200 rounded-lg p-4 flex flex-row gap-2">
+            <View className="w-20 h-20 bg-yellow-500 rounded-full items-center justify-center mb-4">
+              <Ionicons name="person" size={32} color="white" />
+            </View>
+
+            <View className="flex-col gap-4">
+              <Text className="font-sora text-gray-600">Saddik</Text>
 
               {/* Stats */}
-              <View className="flex-row space-x-6">
-                <View className="items-center">
+              <View className="flex-row gap-6">
+                <View className="items-start">
                   <Text className="text-lg font-sora-bold text-gray-900">
                     {stats.totalMoments}
                   </Text>
-                  <Text className="font-sora text-gray-600 text-sm">
-                    Total Moments
+                  <Text className="font-sora text-gray-600 text-xs">
+                    Moments
                   </Text>
                 </View>
-                <View className="items-center">
+                <View className="items-start">
                   <Text className="text-lg font-sora-bold text-gray-900">
                     {stats.momentsThisWeek}
                   </Text>
-                  <Text className="font-sora text-gray-600 text-sm">
+                  <Text className="font-sora text-gray-600 text-xs">
                     This Week
                   </Text>
                 </View>
-                <View className="items-center">
+                <View className="items-start">
                   <Text className="text-lg font-sora-bold text-gray-900">
                     {stats.momentsThisMonth}
                   </Text>
-                  <Text className="font-sora text-gray-600 text-sm">
+                  <Text className="font-sora text-gray-600 text-xs">
                     This Month
                   </Text>
                 </View>

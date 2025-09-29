@@ -1,3 +1,6 @@
+import { Clipboard } from "react-native";
+import Toast from "react-native-toast-message";
+
 export const getCategoryColor = (category: string) => {
   // use index to get the color
   switch (category) {
@@ -78,5 +81,14 @@ export const formatDateAndTime = (date: Date) => {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+};
+
+export const copyToClipboard = (text: string) => {
+  Clipboard.setString(text);
+  Toast.show({
+    type: "addressCopied",
+    text1: "Copied to clipboard",
+    position: "top",
   });
 };

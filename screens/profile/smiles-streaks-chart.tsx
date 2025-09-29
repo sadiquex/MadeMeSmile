@@ -47,17 +47,18 @@ const generateMockData = (): DailySmileData[] => {
 };
 
 const getLevelColor = (level: number): string => {
+  // use shades of yellow
   switch (level) {
     case 0:
-      return "#EBEDF0"; // Light gray
+      return "#FFE0B2"; // Light yellow
     case 1:
-      return "#C6E48B"; // Light green
+      return "#FFC107"; // Light yellow
     case 2:
-      return "#7BC96F"; // Medium green
+      return "#FFD54F"; // Medium yellow
     case 3:
-      return "#239A3B"; // Dark green
+      return "#FFA000"; // Medium yellow
     case 4:
-      return "#196127"; // Darkest green
+      return "#FF6F00"; // Darkest yellow
     default:
       return "#EBEDF0";
   }
@@ -107,8 +108,20 @@ export default function SmilesStreaksChart({
 
   // Group filtered data by weeks (7 days per row)
   const weeks: DailySmileData[][] = [];
+  const weekNumbers: number[] = [];
+
   for (let i = 0; i < filteredData.length; i += 7) {
-    weeks.push(filteredData.slice(i, i + 7));
+    const weekData = filteredData.slice(i, i + 7);
+    weeks.push(weekData);
+
+    // Calculate the actual week number for this week
+    if (weekData.length > 0) {
+      const firstDayOfWeek = new Date(weekData[0].date);
+      const weekNumber = Math.ceil(firstDayOfWeek.getDate() / 7);
+      weekNumbers.push(weekNumber);
+    } else {
+      weekNumbers.push(0);
+    }
   }
 
   // Calculate stats for filtered data
@@ -196,7 +209,7 @@ export default function SmilesStreaksChart({
                   lineHeight: 12,
                 }}
               >
-                W{weekIndex + 1}
+                W{weekNumbers[weekIndex] || weekIndex + 1}
               </Text>
             ))}
           </View>

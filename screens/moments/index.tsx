@@ -28,7 +28,7 @@ export default function MomentsComponent() {
 
   const renderMomentsList = () => {
     return filteredMoments.map((moment: Moment) => (
-      <View key={moment.id} className="mb-4 pb-[90px]">
+      <View key={moment.id} className="mb-4">
         <SmileCard moment={moment} />
       </View>
     ));
