@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1061797336711",
+    "project_id": "mademesmile-2dec8",
+    "storage_bucket": "mademesmile-2dec8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1061797336711:android:553a802d2c0de9c8c84a22",
+        "android_client_info": {
+          "package_name": "com.mademesmile.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXpv_e43HadRRrioMS-lzdsIE4CIZmzYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

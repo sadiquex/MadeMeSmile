@@ -2,7 +2,7 @@ import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 
 interface CustomButtonProps {
-  title: string;
+  title: string | React.ReactNode;
   onPress: () => void;
   className?: string;
   textClassName?: string;

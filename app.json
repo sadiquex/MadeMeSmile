@@ -16,7 +16,7 @@
         "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select photos and videos for your moments.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.sadique-x.MadeMeSmile"
+      "bundleIdentifier": "com.mademesmile.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +34,7 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "com.sadique_x.mademesmile"
+      "package": "com.mademesmile.app"
     },
     "web": {
       "output": "static",

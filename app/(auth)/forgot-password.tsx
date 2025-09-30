@@ -1,38 +1,93 @@
+import CustomButton from "@/components/ui/custom-button";
+import CustomInput from "@/components/ui/custom-input";
+import { resetPassword } from "@/services/auth/auth.service";
+import { CameraSmile01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
+
+// Email validation helper
+const isValidEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!email) {
-      Alert.alert("Error", "Please enter your email address");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter your email address",
+      });
       return;
     }
 
-    // TODO: Implement actual password reset logic
-    console.log("Password reset request for:", email);
+    if (!isValidEmail(email)) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter a valid email address",
+      });
+      return;
+    }
 
-    Alert.alert(
-      "Reset Link Sent",
-      "We've sent a password reset link to your email address.",
-      [
-        {
-          text: "OK",
-          onPress: () => router.push("/(auth)/login"),
-        },
-      ]
-    );
+    setLoading(true);
+    try {
+      await resetPassword(email.trim());
+
+      Toast.show({
+        type: "success",
+        text1: "Reset Link Sent",
+        text2: "We've sent a password reset link to your email address.",
+        onPress: () => router.push("/(auth)/login"),
+      });
+
+      // Navigate after a short delay
+      setTimeout(() => {
+        router.push("/(auth)/login");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      let errorMessage = "Failed to send reset email. Please try again.";
+
+      switch (error.code) {
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email address.";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Invalid email address format.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many requests. Please try again later.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error. Please check your internet connection.";
+          break;
+        default:
+          errorMessage = `Failed to send reset email: ${error.message}`;
+      }
+
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: errorMessage,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,39 +103,38 @@ export default function ForgotPasswordScreen() {
       >
         <View className="flex-1 bg-white px-6">
           <View className="flex-1 justify-center">
-            <View className="mb-8">
-              <Text className="text-3xl font-bold text-gray-900 mb-2">
+            <View className="mb-8 flex flex-col gap-2">
+              <HugeiconsIcon
+                icon={CameraSmile01Icon}
+                size={60}
+                color="#f87171"
+              />
+
+              <Text className="text-3xl font-sora-bold text-gray-900">
                 Reset Password
               </Text>
-              <Text className="text-gray-600">
+              <Text className="text-gray-600 font-sora">
                 Enter your email address and we'll send you a link to reset your
                 password
               </Text>
             </View>
 
-            <View className="space-y-4">
-              <View>
-                <Text className="text-gray-700 font-medium mb-2">Email</Text>
-                <TextInput
-                  className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  returnKeyType="done"
-                  onSubmitEditing={handleResetPassword}
-                />
-              </View>
+            <View className="flex gap-4">
+              <CustomInput
+                label="Email"
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                returnKeyType="done"
+                onSubmitEditing={handleResetPassword}
+              />
 
-              <TouchableOpacity
-                className="bg-blue-500 rounded-lg py-4 mt-6"
+              <CustomButton
+                title={loading ? "Sending..." : "Send Reset Link"}
                 onPress={handleResetPassword}
-              >
-                <Text className="text-white text-center font-semibold text-lg">
-                  Send Reset Link
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           </View>
 
@@ -88,7 +142,7 @@ export default function ForgotPasswordScreen() {
             <Text className="text-gray-600 text-center">
               Remember your password?{" "}
               <Text
-                className="text-blue-500 font-semibold"
+                className="text-primary font-semibold"
                 onPress={() => router.push("/(auth)/login")}
               >
                 Sign In
