@@ -9,6 +9,7 @@ export interface Moment {
   createdAt: Date;
   updatedAt: Date;
   mood?: "happy" | "grateful" | "excited" | "peaceful";
+  likes?: number;
 }
 
 export interface Category {
