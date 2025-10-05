@@ -1,3 +1,4 @@
+import { markOnboardingCompleted } from "@/services/auth/auth.service";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -87,14 +88,14 @@ export default function OnboardingScreen() {
       });
     } else {
       // Mark onboarding as completed and navigate to login
-      //   await AsyncStorage.setItem("hasCompletedOnboarding", "true");
+      await markOnboardingCompleted();
       router.replace("/(auth)/login");
     }
   };
 
   const handleSkip = async () => {
     // Mark onboarding as completed and navigate to login
-    // await AsyncStorage.setItem("hasCompletedOnboarding", "true");
+    await markOnboardingCompleted();
     router.replace("/(auth)/login");
   };
 

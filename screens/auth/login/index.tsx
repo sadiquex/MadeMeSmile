@@ -56,9 +56,9 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const user = await signIn(email.trim(), password);
+      await signIn(email.trim(), password);
 
-      console.log("Login successful:", user);
+      // console.log("Login successful");
 
       // Show success message
       Toast.show({

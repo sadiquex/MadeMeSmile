@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/contexts/AuthContext";
 import toastConfig from "@/lib/ToastConfig";
 import {
   Sora_400Regular,
@@ -35,20 +36,22 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="index" />
-        </Stack>
-        <StatusBar style="auto" />
-      </BottomSheetModalProvider>
-      <Toast config={toastConfig} />
-    </GestureHandlerRootView>
+    <AuthProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BottomSheetModalProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="index" />
+          </Stack>
+          <StatusBar style="auto" />
+        </BottomSheetModalProvider>
+        <Toast config={toastConfig} />
+      </GestureHandlerRootView>
+    </AuthProvider>
   );
 }

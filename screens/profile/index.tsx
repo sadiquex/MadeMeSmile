@@ -1,9 +1,11 @@
 import ScreenHeader, { HeaderHeightSpace } from "@/components/ui/screen-header";
+import { useAuth } from "@/contexts/AuthContext";
 import SmilesStreaksChart from "@/screens/profile/smiles-streaks-chart";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { MomentService } from "../../services/MomentService";
 
 export default function ProfileScreenComponent() {
@@ -13,6 +15,7 @@ export default function ProfileScreenComponent() {
     momentsThisMonth: 0,
     categoryCounts: {} as Record<string, number>,
   });
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     loadStats();
@@ -36,9 +39,22 @@ export default function ProfileScreenComponent() {
       {
         text: "Logout",
         style: "destructive",
-        onPress: () => {
-          // TODO: Implement actual logout logic
-          router.replace("/(auth)/splash");
+        onPress: async () => {
+          try {
+            await signOut();
+            Toast.show({
+              type: "success",
+              text1: "Logged out successfully",
+            });
+            router.replace("/(auth)/splash");
+          } catch (error) {
+            console.error("Logout error:", error);
+            Toast.show({
+              type: "error",
+              text1: "Logout failed",
+              text2: "Please try again",
+            });
+          }
         },
       },
     ]);
@@ -54,7 +70,7 @@ export default function ProfileScreenComponent() {
 
   return (
     <>
-      <ScreenHeader title="Ibrahim Saddik" />
+      <ScreenHeader title={user?.displayName || user?.email || "Profile"} />
 
       <ScrollView className="flex-1">
         <HeaderHeightSpace style={{ height: 40 }} />
@@ -67,7 +83,9 @@ export default function ProfileScreenComponent() {
             </View>
 
             <View className="flex-col gap-4">
-              <Text className="font-sora text-gray-600">Saddik</Text>
+              <Text className="font-sora text-gray-600">
+                {user?.displayName || user?.email || "User"}
+              </Text>
 
               {/* Stats */}
               <View className="flex-row gap-6">
