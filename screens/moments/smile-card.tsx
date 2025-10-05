@@ -1,3 +1,4 @@
+import VideoPlayer from "@/components/ui/video-player";
 import { getCategoryColor, getCategoryIcon } from "@/lib/utils";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -38,6 +39,16 @@ export default function SmileCard({ moment }: SmileCardProps) {
             source={{ uri: moment.mediaUrl }}
             className="w-full h-[280px]"
             resizeMode="cover"
+          />
+        ) : moment.mediaUrl && moment.mediaType === "video" ? (
+          <VideoPlayer
+            uri={moment.mediaUrl}
+            width="100%"
+            height={280}
+            showControls={false}
+            autoPlay={false}
+            loop={false}
+            muted={true}
           />
         ) : (
           <View className="w-full h-[280px] bg-gradient-to-br from-gray-50 to-gray-100 items-center justify-center">

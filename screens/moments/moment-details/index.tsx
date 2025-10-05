@@ -1,16 +1,18 @@
 import ScreenHeader from "@/components/ui/screen-header";
+import VideoPlayer from "@/components/ui/video-player";
 import {
   formatDateAndTime,
   getCategoryColor,
   getCategoryGradientColors,
   getCategoryIcon,
 } from "@/lib/utils";
-import { DUMMY_MOMENTS } from "@/screens/moments/dummy-data";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Image, ScrollView, Text, View } from "react-native";
+import { getMoments } from "../../../services/moments/moments.service";
+import { Moment } from "../../../types";
 import MomentActionsModal from "./moment-actions-modal";
 
 export default function MomentDetailsScreen() {
@@ -18,18 +20,35 @@ export default function MomentDetailsScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const imageHeight = 320; // Height of the image section
   const [showActionsModal, setShowActionsModal] = useState(false);
+  const [moment, setMoment] = useState<Moment | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // TODO: Replace with actual data fetching
+  const fetchMoment = useCallback(async () => {
+    if (!id) return;
 
-  const moment = DUMMY_MOMENTS.find((moment) => moment.id === id);
+    try {
+      setIsLoading(true);
+      setError(null);
+      const moments = await getMoments();
+      const foundMoment = moments.find((m) => m.id === id);
 
-  if (!moment) {
-    return (
-      <View>
-        <Text>Moment not found</Text>
-      </View>
-    );
-  }
+      if (foundMoment) {
+        setMoment(foundMoment);
+      } else {
+        setError("Moment not found");
+      }
+    } catch (err) {
+      console.error("Error fetching moment:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch moment");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchMoment();
+  }, [fetchMoment]);
 
   const getMoodEmoji = (mood?: string) => {
     switch (mood) {
@@ -70,6 +89,42 @@ export default function MomentDetailsScreen() {
     console.log("Add to collection:", moment?.id);
     // TODO: Implement add to collection
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-white">
+        <ScreenHeader title="Loading..." showBackButton />
+        <View className="flex-1 items-center justify-center">
+          <Ionicons name="hourglass-outline" size={64} color="#9CA3AF" />
+          <Text className="font-sora-bold text-gray-900 text-xl mt-4 mb-2">
+            Loading moment...
+          </Text>
+          <Text className="font-sora text-gray-600 text-center px-8">
+            Please wait while we fetch your moment
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error || !moment) {
+    return (
+      <View className="flex-1 bg-white">
+        <ScreenHeader title="Error" showBackButton />
+        <View className="flex-1 items-center justify-center">
+          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+          <Text className="font-sora-bold text-gray-900 text-xl mt-4 mb-2">
+            {error || "Moment not found"}
+          </Text>
+          <Text className="font-sora text-gray-600 text-center px-8">
+            This moment may have been deleted or doesn&apos;t exist
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">
@@ -112,6 +167,16 @@ export default function MomentDetailsScreen() {
                 source={{ uri: moment.mediaUrl }}
                 style={{ width: "100%", height: imageHeight * 1.5 }}
                 resizeMode="cover"
+              />
+            ) : moment.mediaUrl && moment.mediaType === "video" ? (
+              <VideoPlayer
+                uri={moment.mediaUrl}
+                width="100%"
+                height={imageHeight * 1.5}
+                showControls={true}
+                autoPlay={false}
+                loop={false}
+                muted={false}
               />
             ) : (
               <View

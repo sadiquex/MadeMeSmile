@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Camera01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
   Alert,
@@ -18,7 +19,10 @@ import {
   View,
 } from "react-native";
 import { MediaFile, MediaService } from "../../services/MediaService";
-import { MomentService } from "../../services/MomentService";
+import {
+  addMoment,
+  CreateMomentData,
+} from "../../services/moments/moments.service";
 import {
   COLLECTION_OPTIONS,
   DEFAULT_CATEGORIES,
@@ -27,6 +31,7 @@ import {
 import SaveToCollectionModal from "./save-to-collection-modal";
 
 export default function AddMoment() {
+  const router = useRouter();
   const [content, setContent] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("random");
   const [selectedMood, setSelectedMood] = useState<string>("");
@@ -36,6 +41,7 @@ export default function AddMoment() {
 
   const [mediaFile, setMediaFile] = useState<MediaFile | null>(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const handleSaveMoment = async () => {
@@ -44,38 +50,58 @@ export default function AddMoment() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      await MomentService.saveMoment({
+      const momentData: CreateMomentData = {
         content: content.trim(),
         mediaType: mediaFile ? mediaFile.type : "text",
         mediaUrl: mediaFile?.uri,
         category: selectedCategory,
         collection: selectedCollection || undefined,
         tags,
-        mood: selectedMood as any,
-      });
+        mood: selectedMood as
+          | "happy"
+          | "grateful"
+          | "excited"
+          | "peaceful"
+          | undefined,
+      };
+
+      await addMoment(momentData);
 
       Alert.alert("Success!", "Your moment has been saved! 🎉", [
         {
           text: "OK",
           onPress: () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            // Reset form
-            setContent("");
-            setSelectedCategory("random");
-            setSelectedMood("");
-            setSelectedCollection("");
-            setTags([]);
-            setNewTag("");
-            setMediaFile(null);
+            // Reset form and navigate back
+            resetForm();
+            router.back();
           },
         },
       ]);
     } catch (error) {
       console.error("Error saving moment:", error);
-      Alert.alert("Error", "Failed to save your moment. Please try again.");
+      Alert.alert(
+        "Error",
+        error instanceof Error
+          ? error.message
+          : "Failed to save your moment. Please try again."
+      );
     } finally {
+      setIsLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setContent("");
+    setSelectedCategory("random");
+    setSelectedMood("");
+    setSelectedCollection("");
+    setTags([]);
+    setNewTag("");
+    setMediaFile(null);
   };
 
   const handleAddMedia = async () => {
@@ -384,7 +410,11 @@ export default function AddMoment() {
                 </TouchableOpacity>
               </View>
 
-              <CustomButton title="Save Moment" onPress={handleSaveMoment} />
+              <CustomButton
+                title={isLoading ? "Saving..." : "Save Moment"}
+                onPress={handleSaveMoment}
+                variant={isLoading ? "disabled" : "primary"}
+              />
             </View>
           </ScrollView>
         </Container>

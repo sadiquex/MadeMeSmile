@@ -1,5 +1,11 @@
+import { clsx, type ClassValue } from "clsx";
 import { Clipboard } from "react-native";
 import Toast from "react-native-toast-message";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export const getCategoryColor = (category: string) => {
   // use index to get the color
