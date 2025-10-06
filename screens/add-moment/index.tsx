@@ -1,5 +1,4 @@
 import { Container } from "@/components/ui/container";
-import CustomButton from "@/components/ui/custom-button";
 import ScreenHeader, { HeaderHeightSpace } from "@/components/ui/screen-header";
 import { Ionicons } from "@expo/vector-icons";
 import { Camera01Icon } from "@hugeicons/core-free-icons";
@@ -8,26 +7,26 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
+  Dimensions,
   Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { MediaFile, MediaService } from "../../services/MediaService";
 import {
   addMoment,
   CreateMomentData,
 } from "../../services/moments/moments.service";
-import {
-  COLLECTION_OPTIONS,
-  DEFAULT_CATEGORIES,
-  MOOD_OPTIONS,
-} from "../../types";
+import { COLLECTION_OPTIONS, MOOD_OPTIONS } from "../../types";
 import SaveToCollectionModal from "./save-to-collection-modal";
 
 export default function AddMoment() {
@@ -44,11 +43,14 @@ export default function AddMoment() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+  const MEDIA_HEIGHT = SCREEN_HEIGHT * 0.5;
+
   const handleSaveMoment = async () => {
-    if (!content.trim()) {
-      Alert.alert("Error", "Please write something about your moment");
-      return;
-    }
+    // if (!content.trim()) {
+    //   Alert.alert("Error", "Please write something about your moment");
+    //   return;
+    // }
 
     setIsLoading(true);
 
@@ -165,16 +167,16 @@ export default function AddMoment() {
           >
             <HeaderHeightSpace style={{ height: 110 }} />
 
-            <View className="gap-4 mb-16">
+            <View className="flex-1 gap-4 mb-[66px]">
               {/* Media Section */}
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
+              <View style={{ height: MEDIA_HEIGHT }}>
+                <Text className="font-sora-medium text-gray-900 mb-2">
                   Media
                 </Text>
 
                 {mediaFile ? (
-                  <View className="bg-white rounded-lg p-4 border border-gray-200">
-                    <View className="flex-row items-center justify-between mb-3">
+                  <View className="bg-white rounded-lg p-4 border border-gray-200 flex-1">
+                    <View className="flex-row items-center justify-between mb-2">
                       <View className="flex-row items-center">
                         <Ionicons
                           name={
@@ -203,14 +205,14 @@ export default function AddMoment() {
                     {mediaFile.type === "photo" && (
                       <Image
                         source={{ uri: mediaFile.uri }}
-                        className="w-full h-48 rounded-lg"
+                        className="w-full flex-1 rounded-lg"
                         resizeMode="cover"
                       />
                     )}
 
                     {(mediaFile.type === "video" ||
                       mediaFile.type === "audio") && (
-                      <View className="bg-gray-100 rounded-lg p-4 items-center">
+                      <View className="bg-gray-100 rounded-lg p-4 items-center flex-1 justify-center">
                         <Ionicons
                           name={
                             mediaFile.type === "video"
@@ -230,7 +232,7 @@ export default function AddMoment() {
                   </View>
                 ) : (
                   <TouchableOpacity
-                    className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 items-center"
+                    className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 items-center flex-1 justify-center"
                     onPress={handleAddMedia}
                   >
                     <HugeiconsIcon icon={Camera01Icon} />
@@ -246,31 +248,25 @@ export default function AddMoment() {
               </View>
 
               {/* Description */}
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
-                  What made you smile?
+              <View className="min-h-[100px]">
+                <Text className="font-sora-medium text-gray-900 mb-2">
+                  What made you smile today?
                 </Text>
-                <View className="bg-white rounded-lg p-4 border border-gray-200">
-                  <TextInput
-                    className="font-sora text-gray-900 min-h-[30px] text-base"
-                    placeholder="Share what made you smile today..."
-                    value={content}
-                    onChangeText={setContent}
-                    multiline
-                    textAlignVertical="top"
-                    maxLength={280}
-                    returnKeyType="default"
-                    blurOnSubmit={false}
-                  />
-                  <Text className="font-sora text-gray-400 text-xs mt-2 text-right">
-                    {content.length}/280
-                  </Text>
-                </View>
+                <Textarea
+                  value={content}
+                  onChangeText={setContent}
+                  placeholder="What made you smile today..."
+                  maxLength={280}
+                  className="border-dashed border-gray-300 text-gray-800 placeholder:text-gray-400 flex-1"
+                />
+                <Text className="font-sora text-gray-400 text-xs mt-2 text-right">
+                  {content.length}/280
+                </Text>
               </View>
 
               {/* Category Selection */}
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
+              {/* <View className="">
+                <Text className="font-sora-medium text-gray-900 mb-2">
                   Category
                 </Text>
                 <View className="flex-row flex-wrap gap-3">
@@ -299,11 +295,11 @@ export default function AddMoment() {
                     </TouchableOpacity>
                   ))}
                 </View>
-              </View>
+              </View> */}
 
               {/* Mood Selection */}
               <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
+                <Text className="font-sora-medium text-gray-900 mb-2">
                   How are you feeling?
                 </Text>
                 <View className="flex-row flex-wrap gap-3">
@@ -336,13 +332,12 @@ export default function AddMoment() {
               </View>
 
               {/* Tags */}
-              <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-3">
+              {/* <View className="">
+                <Text className="font-sora-medium text-gray-900 mb-2">
                   Hashtags? (Optional)
                 </Text>
 
-                {/* Add Tag Input */}
-                <View className="flex-row items-center mb-3">
+                <View className="flex-row items-center mb-2">
                   <TextInput
                     className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 font-sora text-gray-900"
                     placeholder="Add some hashtags..."
@@ -360,7 +355,6 @@ export default function AddMoment() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Display Tags */}
                 {tags.length > 0 && (
                   <View className="flex-row flex-wrap gap-2">
                     {tags.map((tag, index) => (
@@ -377,11 +371,11 @@ export default function AddMoment() {
                     ))}
                   </View>
                 )}
-              </View>
+              </View> */}
 
               {/* Collection Selection */}
               <View className="">
-                {/* <Text className="font-sora-medium text-gray-900 mb-3">
+                {/* <Text className="font-sora-medium text-gray-900 mb-2">
                   Add to Collection (optional)
                 </Text> */}
                 <TouchableOpacity
@@ -410,11 +404,12 @@ export default function AddMoment() {
                 </TouchableOpacity>
               </View>
 
-              <CustomButton
-                title={isLoading ? "Saving..." : "Save Moment"}
-                onPress={handleSaveMoment}
-                variant={isLoading ? "disabled" : "primary"}
-              />
+              <Button onPress={handleSaveMoment} disabled={isLoading}>
+                {isLoading && <ActivityIndicator size="small" color="#fff" />}
+                <Text className="font-sora-medium text-white">
+                  {isLoading ? "Saving..." : "Save Moment"}
+                </Text>
+              </Button>
             </View>
           </ScrollView>
         </Container>
