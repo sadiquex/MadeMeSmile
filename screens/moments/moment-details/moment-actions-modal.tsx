@@ -12,6 +12,7 @@ interface MomentActionsModalProps {
   onShare?: () => void;
   onAddToCollection?: () => void;
   hasMedia?: boolean;
+  isSaving?: boolean;
 }
 
 export default function MomentActionsModal({
@@ -23,6 +24,7 @@ export default function MomentActionsModal({
   onShare,
   onAddToCollection,
   hasMedia = false,
+  isSaving = false,
 }: MomentActionsModalProps) {
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<string>("");
@@ -50,9 +52,21 @@ export default function MomentActionsModal({
               </Text>
             </TouchableOpacity>
 
-            <Text className="font-sora-medium text-gray-800 text-base">
-              Save to Gallery
-            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                onSaveToGallery?.();
+                onClose?.();
+              }}
+              disabled={isSaving || !hasMedia}
+            >
+              <Text
+                className={`font-sora-medium text-base ${
+                  isSaving || !hasMedia ? "text-gray-400" : "text-gray-800"
+                }`}
+              >
+                {isSaving ? "Saving..." : "Save to Gallery"}
+              </Text>
+            </TouchableOpacity>
 
             {/* share moment */}
             <TouchableOpacity
@@ -62,6 +76,7 @@ export default function MomentActionsModal({
                   message: "Check out this moment!",
                   url: "https://www.github.com/sadiquex",
                 });
+                onClose?.();
               }}
             >
               <Text className="font-sora-medium text-gray-800 text-base">
@@ -69,12 +84,26 @@ export default function MomentActionsModal({
               </Text>
             </TouchableOpacity>
 
-            <Text className="font-sora-medium text-gray-800 text-base">
-              Edit Moment
-            </Text>
-            <Text className="font-sora-medium text-red-600 text-base">
-              Delete Moment
-            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                onEdit?.();
+                onClose?.();
+              }}
+            >
+              <Text className="font-sora-medium text-gray-800 text-base">
+                Edit Moment
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                onDelete?.();
+                onClose?.();
+              }}
+            >
+              <Text className="font-sora-medium text-red-600 text-base">
+                Delete Moment
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </BottomModal>

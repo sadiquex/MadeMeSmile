@@ -1,17 +1,18 @@
 import CustomButton from "@/components/ui/custom-button";
 import CustomInput from "@/components/ui/custom-input";
-import { signIn } from "@/services/auth/auth.service";
 import {
-  AppleIcon,
-  CameraSmile01Icon,
-  FacebookIcon,
-  GoogleIcon,
-} from "@hugeicons/core-free-icons";
+  signIn,
+  signInWithApple,
+  signInWithGoogle,
+  signInWithTwitter,
+} from "@/services/auth/auth.service";
+import { CameraSmile01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -27,6 +28,11 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState({
+    google: false,
+    apple: false,
+    twitter: false,
+  });
 
   const handleLogin = async () => {
     // Input validation
@@ -119,6 +125,84 @@ export default function LoginScreen() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setSocialLoading((prev) => ({ ...prev, google: true }));
+    try {
+      await signInWithGoogle();
+
+      Toast.show({
+        type: "success",
+        text1: "Welcome back!",
+        onPress: () => router.replace("/(tabs)"),
+      });
+
+      setTimeout(() => {
+        router.replace("/(tabs)");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Google Sign-In error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Google Sign-In Failed",
+        text2: error.message || "Please try again",
+      });
+    } finally {
+      setSocialLoading((prev) => ({ ...prev, google: false }));
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setSocialLoading((prev) => ({ ...prev, apple: true }));
+    try {
+      await signInWithApple();
+
+      Toast.show({
+        type: "success",
+        text1: "Welcome back!",
+        onPress: () => router.replace("/(tabs)"),
+      });
+
+      setTimeout(() => {
+        router.replace("/(tabs)");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Apple Sign-In error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Apple Sign-In Failed",
+        text2: error.message || "Please try again",
+      });
+    } finally {
+      setSocialLoading((prev) => ({ ...prev, apple: false }));
+    }
+  };
+
+  const handleTwitterSignIn = async () => {
+    setSocialLoading((prev) => ({ ...prev, twitter: true }));
+    try {
+      await signInWithTwitter();
+
+      Toast.show({
+        type: "success",
+        text1: "Welcome back!",
+        onPress: () => router.replace("/(tabs)"),
+      });
+
+      setTimeout(() => {
+        router.replace("/(tabs)");
+      }, 1500);
+    } catch (error: any) {
+      console.error("Twitter Sign-In error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Twitter Sign-In Failed",
+        text2: error.message || "Please try again",
+      });
+    } finally {
+      setSocialLoading((prev) => ({ ...prev, twitter: false }));
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -188,22 +272,51 @@ export default function LoginScreen() {
                 <View className="h-[1px] bg-gray-200 flex-1" />
               </View>
 
-              {/* or continue with google or apple */}
+              {/* Social authentication buttons */}
               <View className="flex-row justify-between gap-2">
-                <TouchableOpacity className="flex-1 bg-white rounded-lg p-2 border border-gray-200 items-center">
-                  <HugeiconsIcon icon={GoogleIcon} size={24} color="#f87171" />
+                <TouchableOpacity
+                  className="flex-1 bg-white rounded-lg p-2 border border-gray-200 items-center"
+                  onPress={handleGoogleSignIn}
+                  disabled={socialLoading.google}
+                >
+                  {socialLoading.google ? (
+                    <ActivityIndicator size="small" color="#f87171" />
+                  ) : (
+                    <Image
+                      source={require("@/assets/images/login/google-icon.png")}
+                      className="w-6 h-6"
+                    />
+                  )}
                 </TouchableOpacity>
 
-                <TouchableOpacity className="flex-1 bg-white rounded-lg p-2 border border-gray-200 items-center">
-                  <HugeiconsIcon icon={AppleIcon} size={24} color="#f87171" />
+                <TouchableOpacity
+                  className="flex-1 bg-white rounded-lg p-2 border border-gray-200 items-center"
+                  onPress={handleAppleSignIn}
+                  disabled={socialLoading.apple}
+                >
+                  {socialLoading.apple ? (
+                    <ActivityIndicator size="small" color="#f87171" />
+                  ) : (
+                    <Image
+                      source={require("@/assets/images/login/apple-icon.png")}
+                      className="w-6 h-6"
+                    />
+                  )}
                 </TouchableOpacity>
 
-                <TouchableOpacity className="flex-1 bg-white rounded-lg p-2 border border-gray-200 items-center">
-                  <HugeiconsIcon
-                    icon={FacebookIcon}
-                    size={24}
-                    color="#f87171"
-                  />
+                <TouchableOpacity
+                  className="flex-1 bg-white rounded-lg p-2 border border-gray-200 items-center"
+                  onPress={handleTwitterSignIn}
+                  disabled={socialLoading.twitter}
+                >
+                  {socialLoading.twitter ? (
+                    <ActivityIndicator size="small" color="#f87171" />
+                  ) : (
+                    <Image
+                      source={require("@/assets/images/login/twitter-icon.png")}
+                      className="w-6 h-6"
+                    />
+                  )}
                 </TouchableOpacity>
               </View>
 

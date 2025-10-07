@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 interface AuthGuardProps {
@@ -10,6 +10,13 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      // Redirect to login page if not authenticated
+      router.replace("/(auth)/login");
+    }
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -25,8 +32,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
       return <>{fallback}</>;
     }
 
-    // Redirect to splash screen if not authenticated
-    router.replace("/(auth)/splash");
+    // Return null while redirect is happening
     return null;
   }
 

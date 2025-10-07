@@ -1,12 +1,31 @@
 import { auth, db } from "@/firebase-config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  OAuthProvider,
   sendPasswordResetEmail,
+  signInWithCredential,
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+
+// import * as AuthSession from "expo-auth-session";
+// import * as WebBrowser from "expo-web-browser";
+// import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+// import { auth, db } from "@/firebase-config";
+// import { doc, getDoc, setDoc } from "firebase/firestore";
+// import { storeUserData } from "./auth";
+
+// Configure WebBrowser for OAuth flows
+WebBrowser.maybeCompleteAuthSession();
+
+const GOOGLE_CLIENT_ID =
+  "375112534665-b5qekn5fjrda33fbba6tsj4o69vprlss.apps.googleusercontent.com";
 
 const TOKEN_STORAGE_KEY = "@mademesmile_tokens";
 const USER_STORAGE_KEY = "@mademesmile_user";
@@ -176,5 +195,282 @@ export async function resetOnboardingStatus(): Promise<void> {
     await AsyncStorage.removeItem(ONBOARDING_STORAGE_KEY);
   } catch (error) {
     console.error("Error resetting onboarding status:", error);
+  }
+}
+
+// export async function signInWithGoogle() {
+//   try {
+//     const redirectUri = AuthSession.makeRedirectUri({
+//       // scheme: "mademesmile",
+//       // path: "auth",
+//       native: "mademesmile://auth", // for production builds
+//     });
+//     console.log("🚀 ~ signInWithGoogle ~ redirectUri:", redirectUri);
+
+//     const authUrl =
+//       "https://accounts.google.com/o/oauth2/v2/auth?" +
+//       new URLSearchParams({
+//         client_id: GOOGLE_CLIENT_ID,
+//         redirect_uri: redirectUri,
+//         response_type: "id_token",
+//         scope: "openid email profile",
+//       }).toString();
+
+//     const result = await AuthSession.promptAsync({ authUrl });
+
+//     if (result.type === "success" && result.params.id_token) {
+//       const credential = GoogleAuthProvider.credential(result.params.id_token);
+//       const userCredential = await signInWithCredential(auth, credential);
+//       const user = userCredential.user;
+
+//       const userDoc = await getDoc(doc(db, "users", user.uid));
+//       if (!userDoc.exists()) {
+//         await setDoc(doc(db, "users", user.uid), {
+//           displayName: user.displayName,
+//           email: user.email,
+//           photoURL: user.photoURL,
+//           createdAt: new Date().toISOString(),
+//           lastLogin: new Date().toISOString(),
+//           provider: "google",
+//         });
+//       } else {
+//         await setDoc(
+//           doc(db, "users", user.uid),
+//           { lastLogin: new Date().toISOString() },
+//           { merge: true }
+//         );
+//       }
+
+//       await storeUserData(user);
+//       return user;
+//     } else {
+//       throw new Error("Google Sign-In cancelled or failed");
+//     }
+//   } catch (error) {
+//     console.error("Google Sign-In Error:", error);
+//     throw error;
+//   }
+// }
+
+// Google Sign-In using Expo AuthSession
+export async function signInWithGoogle() {
+  try {
+    // Create a redirect URI
+    const redirectUri = AuthSession.makeRedirectUri({
+      scheme: "mademesmile",
+      path: "auth",
+    });
+
+    // Create the auth request
+    const request = new AuthSession.AuthRequest({
+      clientId: GOOGLE_CLIENT_ID,
+      scopes: ["openid", "profile", "email"],
+      redirectUri,
+      responseType: AuthSession.ResponseType.Code,
+      extraParams: {
+        access_type: "offline",
+      },
+    });
+
+    // Start the authentication flow
+    const result = await request.promptAsync({
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    });
+
+    // console.log(AuthSession.makeRedirectUri({ useProxy: true }));
+
+    if (result.type === "success") {
+      // Exchange the authorization code for tokens
+      const tokenResponse = await AuthSession.exchangeCodeAsync(
+        {
+          clientId: GOOGLE_CLIENT_ID,
+          code: result.params.code,
+          redirectUri,
+          extraParams: {
+            code_verifier: request.codeVerifier || "",
+          },
+        },
+        {
+          tokenEndpoint: "https://oauth2.googleapis.com/token",
+        }
+      );
+
+      // Create a Google credential with the ID token
+      const googleCredential = GoogleAuthProvider.credential(
+        tokenResponse.idToken
+      );
+
+      // Sign-in the user with the credential
+      const userCredential = await signInWithCredential(auth, googleCredential);
+      const user = userCredential.user;
+
+      // Check if user exists in Firestore, if not create profile
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, "users", user.uid), {
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+          provider: "google",
+        });
+      } else {
+        // Update last login
+        await setDoc(
+          doc(db, "users", user.uid),
+          {
+            lastLogin: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+      }
+
+      // Store user data and tokens
+      await storeUserData(user);
+
+      return user;
+    } else {
+      throw new Error("Google Sign-In was cancelled or failed");
+    }
+  } catch (error: any) {
+    console.error("Google Sign-In Error:", error);
+    throw error;
+  }
+}
+
+// Apple Sign-In
+export async function signInWithApple() {
+  try {
+    // Check if Apple authentication is available
+    const isAvailable = await AppleAuthentication.isAvailableAsync();
+    if (!isAvailable) {
+      throw new Error("Apple Sign-In is not available on this device");
+    }
+
+    // Request Apple authentication
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    // Create Firebase credential
+    const { identityToken } = credential;
+    if (!identityToken) {
+      throw new Error("Apple Sign-In failed - no identity token");
+    }
+
+    const appleCredential = new OAuthProvider("apple.com").credential({
+      idToken: identityToken,
+    });
+
+    // Sign-in the user with the credential
+    const userCredential = await signInWithCredential(auth, appleCredential);
+    const user = userCredential.user;
+
+    // Check if user exists in Firestore, if not create profile
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (!userDoc.exists()) {
+      await setDoc(doc(db, "users", user.uid), {
+        displayName:
+          user.displayName ||
+          `${credential.fullName?.givenName || ""} ${
+            credential.fullName?.familyName || ""
+          }`.trim(),
+        email: user.email || credential.email,
+        photoURL: null,
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        provider: "apple",
+      });
+    } else {
+      // Update last login
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          lastLogin: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+    }
+
+    // Store user data and tokens
+    await storeUserData(user);
+
+    return user;
+  } catch (error: any) {
+    console.error("Apple Sign-In Error:", error);
+    throw error;
+  }
+}
+
+// Twitter Sign-In using Expo AuthSession
+export async function signInWithTwitter() {
+  try {
+    // Create a redirect URI
+    const redirectUri = AuthSession.makeRedirectUri({
+      scheme: "mademesmile",
+      path: "auth",
+    });
+
+    // Create the auth request
+    const request = new AuthSession.AuthRequest({
+      clientId: "YOUR_TWITTER_API_KEY", // Replace with your Twitter API Key
+      scopes: ["tweet.read", "users.read"],
+      redirectUri,
+      responseType: AuthSession.ResponseType.Code,
+      state: Math.random().toString(36).substring(7),
+    });
+
+    // Start the authentication flow
+    const result = await request.promptAsync({
+      authorizationEndpoint: "https://twitter.com/i/oauth2/authorize",
+    });
+
+    if (result.type === "success") {
+      // Exchange the authorization code for tokens
+      const tokenResponse = await AuthSession.exchangeCodeAsync(
+        {
+          clientId: "YOUR_TWITTER_API_KEY",
+          code: result.params.code,
+          redirectUri,
+          extraParams: {
+            code_verifier: request.codeVerifier || "",
+          },
+        },
+        {
+          tokenEndpoint: "https://api.twitter.com/2/oauth2/token",
+        }
+      );
+
+      // Get user info from Twitter API
+      const userInfoResponse = await fetch(
+        "https://api.twitter.com/2/users/me",
+        {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.accessToken}`,
+          },
+        }
+      );
+
+      // Get user info from Twitter API (for future use)
+      const userInfo = await userInfoResponse.json();
+      console.log("Twitter user info:", userInfo);
+
+      // Create a custom token or use Twitter's user info
+      // Note: For production, you'll need to implement server-side token exchange
+      // This is a simplified version for demonstration
+
+      throw new Error(
+        "Twitter Sign-In requires server-side implementation for production use. Please use Google or Apple Sign-In for now."
+      );
+    } else {
+      throw new Error("Twitter Sign-In was cancelled or failed");
+    }
+  } catch (error: any) {
+    console.error("Twitter Sign-In Error:", error);
+    throw error;
   }
 }

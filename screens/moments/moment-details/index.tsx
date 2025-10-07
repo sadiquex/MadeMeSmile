@@ -3,26 +3,33 @@ import VideoPlayer from "@/components/ui/video-player";
 import {
   formatDateAndTime,
   getCategoryColor,
-  getCategoryGradientColors,
   getCategoryIcon,
 } from "@/lib/utils";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+// import { LinearGradient } from "expo-linear-gradient";
+import * as MediaLibrary from "expo-media-library";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Image, ScrollView, Text, View } from "react-native";
-import { getMoments } from "../../../services/moments/moments.service";
+import { Alert, Animated, Image, ScrollView, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
+import {
+  deleteMoment,
+  getMoments,
+} from "../../../services/moments/moments.service";
 import { Moment } from "../../../types";
 import MomentActionsModal from "./moment-actions-modal";
 
 export default function MomentDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
   const imageHeight = 320; // Height of the image section
   const [showActionsModal, setShowActionsModal] = useState(false);
   const [moment, setMoment] = useState<Moment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const fetchMoment = useCallback(async () => {
     if (!id) return;
@@ -71,13 +78,105 @@ export default function MomentDetailsScreen() {
   };
 
   const handleDelete = () => {
-    console.log("Delete moment:", moment?.id);
-    // TODO: Implement delete functionality
+    if (!moment) return;
+
+    Alert.alert(
+      "Delete Moment",
+      "Are you sure you want to delete this moment? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: confirmDelete,
+        },
+      ]
+    );
   };
 
-  const handleSaveToGallery = () => {
-    console.log("Save to gallery:", moment?.mediaUrl);
-    // TODO: Implement save to gallery
+  const confirmDelete = async () => {
+    if (!moment) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteMoment(moment.id);
+
+      // Show success message and navigate back
+      // Alert.alert("Success", "Moment deleted successfully", [
+      //   {
+      //     text: "OK",
+      //     onPress: () => router.back(),
+      //   },
+      // ]);
+      Toast.show({
+        type: "success",
+        text1: "Moment deleted successfully",
+      });
+      router.back();
+    } catch (error) {
+      console.error("Error deleting moment:", error);
+      Alert.alert("Error", "Failed to delete moment. Please try again.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSaveToGallery = async () => {
+    if (!moment?.mediaUrl) {
+      Toast.show({
+        type: "error",
+        text1: "No media to save",
+        text2: "This moment doesn't have any media to save",
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      // Request media library permissions
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Please grant permission to save media to your gallery",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+      // Save the media to gallery
+      const asset = await MediaLibrary.createAssetAsync(moment.mediaUrl);
+
+      // Create album if it doesn't exist
+      const albumName = "MadeMeSmile";
+      let album = await MediaLibrary.getAlbumAsync(albumName);
+      if (!album) {
+        album = await MediaLibrary.createAlbumAsync(albumName, asset, false);
+      } else {
+        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+      }
+
+      Toast.show({
+        type: "success",
+        text1: "Saved to Gallery",
+        text2: `Media saved to ${albumName} album`,
+      });
+    } catch (error) {
+      console.error("Error saving to gallery:", error);
+      Toast.show({
+        type: "error",
+        text1: "Save Failed",
+        text2: "Failed to save media to gallery. Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleShare = () => {
@@ -146,7 +245,7 @@ export default function MomentDetailsScreen() {
       >
         {/* Media Section with Parallax */}
         <View
-          className="relative"
+          className="relative border-b border-gray-400"
           style={{ height: imageHeight, overflow: "hidden" }}
         >
           <Animated.View
@@ -199,7 +298,7 @@ export default function MomentDetailsScreen() {
           </Animated.View>
 
           {/* Gradient Overlay */}
-          <LinearGradient
+          {/* <LinearGradient
             colors={getCategoryGradientColors(moment.category)}
             style={{
               position: "absolute",
@@ -208,7 +307,7 @@ export default function MomentDetailsScreen() {
               bottom: 0,
               height: 120,
             }}
-          />
+          /> */}
 
           {/* Category Badge */}
           <View className="absolute top-4 right-4">
@@ -294,6 +393,7 @@ export default function MomentDetailsScreen() {
         onShare={handleShare}
         onAddToCollection={handleAddToCollection}
         hasMedia={!!moment.mediaUrl}
+        isSaving={isSaving}
       />
     </View>
   );

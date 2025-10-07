@@ -42,10 +42,10 @@ export default function ProfileScreenComponent() {
         onPress: async () => {
           try {
             await signOut();
-            Toast.show({
-              type: "success",
-              text1: "Logged out successfully",
-            });
+            // Toast.show({
+            //   type: "success",
+            //   text1: "Logged out successfully",
+            // });
             router.replace("/(auth)/splash");
           } catch (error) {
             console.error("Logout error:", error);
