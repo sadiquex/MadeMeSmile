@@ -32,6 +32,11 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "package": "com.mademesmile.app"
@@ -84,6 +89,12 @@
         "projectId": "c50c54f4-05df-4ab6-98e0-d573b66bd263"
       }
     },
-    "owner": "sadique_x"
+    "owner": "sadique_x",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c50c54f4-05df-4ab6-98e0-d573b66bd263"
+    }
   }
 }

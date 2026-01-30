@@ -10,50 +10,28 @@ export default function SplashScreen() {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    const checkAuthAndNavigate = async () => {
+    const checkAndNavigate = async () => {
       try {
-        // Wait for auth state to be determined
+        await new Promise((r) => setTimeout(r, 2000));
         if (!loading) {
-          // Simulate loading time for better UX
-          setTimeout(() => {
-            if (user) {
-              // User is authenticated, go to main app
-              router.replace("/(tabs)");
+          if (user) {
+            router.replace("/(tabs)");
+          } else {
+            const onboardingCompleted = await hasCompletedOnboarding();
+            if (onboardingCompleted) {
+              router.replace("/(auth)/login");
             } else {
-              // User is not authenticated, check onboarding status
-              checkOnboardingStatus();
+              router.replace("/(auth)/onboarding");
             }
-          }, 2000);
+          }
         }
       } catch (error) {
-        console.error("Error checking auth status:", error);
-        // Default to onboarding if there's an error
-        setTimeout(() => {
-          router.replace("/(auth)/onboarding");
-        }, 2000);
-      }
-    };
-
-    const checkOnboardingStatus = async () => {
-      try {
-        // Check if user has completed onboarding
-        const onboardingCompleted = await hasCompletedOnboarding();
-
-        if (onboardingCompleted) {
-          // User has completed onboarding, go to login
-          router.replace("/(auth)/login");
-        } else {
-          // First time user, show onboarding
-          router.replace("/(auth)/onboarding");
-        }
-      } catch (error) {
-        console.error("Error checking onboarding status:", error);
-        // Default to onboarding if there's an error
+        console.error("Splash error:", error);
         router.replace("/(auth)/onboarding");
       }
     };
 
-    checkAuthAndNavigate();
+    checkAndNavigate();
   }, [user, loading]);
 
   return (

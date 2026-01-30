@@ -60,26 +60,8 @@ export default function ForgotPasswordScreen() {
       }, 1500);
     } catch (error: any) {
       console.error("Password reset error:", error);
-      let errorMessage = "Failed to send reset email. Please try again.";
-
-      switch (error.code) {
-        case "auth/user-not-found":
-          errorMessage = "No account found with this email address.";
-          break;
-        case "auth/invalid-email":
-          errorMessage = "Invalid email address format.";
-          break;
-        case "auth/too-many-requests":
-          errorMessage = "Too many requests. Please try again later.";
-          break;
-        case "auth/network-request-failed":
-          errorMessage =
-            "Network error. Please check your internet connection.";
-          break;
-        default:
-          errorMessage = `Failed to send reset email: ${error.message}`;
-      }
-
+      const errorMessage =
+        error?.message || "Failed to send reset email. Please try again.";
       Toast.show({
         type: "error",
         text1: "Error",

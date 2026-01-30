@@ -42,10 +42,6 @@ export default function ProfileScreenComponent() {
         onPress: async () => {
           try {
             await signOut();
-            // Toast.show({
-            //   type: "success",
-            //   text1: "Logged out successfully",
-            // });
             router.replace("/(auth)/splash");
           } catch (error) {
             console.error("Logout error:", error);
@@ -145,7 +141,7 @@ export default function ProfileScreenComponent() {
                         {count} moment{count !== 1 ? "s" : ""}
                       </Text>
                     </View>
-                  )
+                  ),
                 )}
               </View>
             </View>

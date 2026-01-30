@@ -13,7 +13,6 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   useEffect(() => {
     if (!loading && !user) {
-      // Redirect to login page if not authenticated
       router.replace("/(auth)/login");
     }
   }, [user, loading]);
@@ -28,11 +27,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
   }
 
   if (!user) {
-    if (fallback) {
-      return <>{fallback}</>;
-    }
-
-    // Return null while redirect is happening
+    if (fallback) return <>{fallback}</>;
     return null;
   }
 

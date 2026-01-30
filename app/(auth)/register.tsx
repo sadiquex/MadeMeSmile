@@ -1,6 +1,7 @@
 import CustomButton from "@/components/ui/custom-button";
 import CustomInput from "@/components/ui/custom-input";
-import { signUp } from "@/services/auth/auth.service";
+import { useAuth } from "@/contexts/AuthContext";
+import { registerUser, storeUserData } from "@/services/auth/auth.service";
 import { CameraSmile01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { router } from "expo-router";
@@ -15,6 +16,7 @@ import {
 import Toast from "react-native-toast-message";
 
 import { isValidEmail } from "@/lib/utils";
+import { RegisterUserPayload } from "@/services/auth/auth.types";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -22,6 +24,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { refreshAuthState } = useAuth();
 
   const handleRegister = async () => {
     // Input validation
@@ -63,57 +66,40 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      const user = await signUp(email.trim(), password, name.trim());
+      const payload: RegisterUserPayload = {
+        email: email.trim(),
+        password: password,
+        displayName: name.trim(),
+      };
 
-      console.log("Registration successful:", user);
+      const response = await registerUser(payload);
+      console.log(
+        "🚀 ~ handleRegister ~ response:",
+        JSON.stringify(response, null, 2),
+      );
 
-      // Show success message
-      Toast.show({
-        type: "success",
-        text1: "Welcome to MadeMeSmile!",
-        text2: "Your account has been created successfully.",
-        onPress: () => router.replace("/(tabs)"),
-      });
-
-      // Navigate after a short delay
-      setTimeout(() => {
+      if (response.success && response.data) {
+        const token =
+          (response.data as { accessToken?: string; token?: string })
+            .accessToken ??
+          (response.data as { accessToken?: string; token?: string }).token;
+        if (token) {
+          await storeUserData(response.data.user, token);
+          await refreshAuthState();
+        }
         router.replace("/(tabs)");
-      }, 1500);
+      } else {
+        Toast.show({
+          type: "error",
+          text1: response.message,
+        });
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
-      let errorMessage = "Registration failed. Please try again.";
-
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          errorMessage =
-            "An account with this email already exists. Please sign in instead.";
-          break;
-        case "auth/invalid-email":
-          errorMessage = "Invalid email address format.";
-          break;
-        case "auth/weak-password":
-          errorMessage =
-            "Password is too weak. Please choose a stronger password.";
-          break;
-        case "auth/network-request-failed":
-          errorMessage =
-            "Network error. Please check your internet connection.";
-          break;
-        case "auth/operation-not-allowed":
-          errorMessage =
-            "Email/password sign-up is not enabled. Please contact support.";
-          break;
-        case "permission-denied":
-          errorMessage = "Permission denied. Please contact support.";
-          break;
-        default:
-          errorMessage = `Registration failed: ${error.message}`;
-      }
-
       Toast.show({
         type: "error",
         text1: "Registration Failed",
-        text2: errorMessage,
+        text2: error?.message ?? "Please try again.",
       });
     } finally {
       setLoading(false);

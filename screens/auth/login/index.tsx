@@ -1,18 +1,13 @@
 import CustomButton from "@/components/ui/custom-button";
 import CustomInput from "@/components/ui/custom-input";
-import {
-  signIn,
-  signInWithApple,
-  signInWithGoogle,
-  signInWithTwitter,
-} from "@/services/auth/auth.service";
+import { useAuth } from "@/contexts/AuthContext";
+import { loginUser, storeUserData } from "@/services/auth/auth.service";
 import { CameraSmile01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -23,16 +18,13 @@ import {
 import Toast from "react-native-toast-message";
 
 import { isValidEmail } from "@/lib/utils";
+import { LoginUserPayload } from "@/services/auth/auth.types";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState({
-    google: false,
-    apple: false,
-    twitter: false,
-  });
+  const { refreshAuthState } = useAuth();
 
   const handleLogin = async () => {
     // Input validation
@@ -62,59 +54,36 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await signIn(email.trim(), password);
+      const payload: LoginUserPayload = {
+        email: email.trim(),
+        password: password,
+      };
 
-      // console.log("Login successful");
+      const response = await loginUser(payload);
+      console.log(
+        "🚀 ~ handleLogin ~ response:",
+        JSON.stringify(response, null, 2),
+      );
 
-      // Show success message
-      Toast.show({
-        type: "success",
-        text1: "Welcome back!",
-        onPress: () => router.replace("/(tabs)"),
-      });
-
-      // Navigate after a short delay
-      setTimeout(() => {
+      if (response.success && response.data) {
+        const token =
+          (response.data as { accessToken?: string; token?: string })
+            .accessToken ??
+          (response.data as { accessToken?: string; token?: string }).token;
+        if (token) {
+          await storeUserData(response.data.user, token);
+          await refreshAuthState();
+        }
         router.replace("/(tabs)");
-      }, 1500);
+      } else {
+        Toast.show({
+          type: "error",
+          text1: response.message,
+        });
+      }
     } catch (error: any) {
       console.error("Login error:", error);
-      let errorMessage = "Login failed. Please try again.";
-
-      switch (error.code) {
-        case "auth/user-not-found":
-          errorMessage =
-            "No account found with this email address. Please check your email or sign up for a new account.";
-          break;
-        case "auth/wrong-password":
-          errorMessage = "Incorrect password. Please try again.";
-          break;
-        case "auth/invalid-email":
-          errorMessage = "Invalid email address format.";
-          break;
-        case "auth/user-disabled":
-          errorMessage =
-            "This account has been disabled. Please contact support.";
-          break;
-        case "auth/too-many-requests":
-          errorMessage = "Too many failed attempts. Please try again later.";
-          break;
-        case "auth/network-request-failed":
-          errorMessage =
-            "Network error. Please check your internet connection.";
-          break;
-        case "auth/invalid-credential":
-          errorMessage =
-            "Invalid email or password. Please check your credentials.";
-          break;
-        case "auth/operation-not-allowed":
-          errorMessage =
-            "Email/password sign-in is not enabled. Please contact support.";
-          break;
-        default:
-          errorMessage = `Login failed: ${error.message}`;
-      }
-
+      const errorMessage = error?.message || "Login failed. Please try again.";
       Toast.show({
         type: "error",
         text1: "Login Failed",
@@ -122,84 +91,6 @@ export default function LoginScreen() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setSocialLoading((prev) => ({ ...prev, google: true }));
-    try {
-      await signInWithGoogle();
-
-      Toast.show({
-        type: "success",
-        text1: "Welcome back!",
-        onPress: () => router.replace("/(tabs)"),
-      });
-
-      setTimeout(() => {
-        router.replace("/(tabs)");
-      }, 1500);
-    } catch (error: any) {
-      console.error("Google Sign-In error:", error);
-      Toast.show({
-        type: "error",
-        text1: "Google Sign-In Failed",
-        text2: error.message || "Please try again",
-      });
-    } finally {
-      setSocialLoading((prev) => ({ ...prev, google: false }));
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    setSocialLoading((prev) => ({ ...prev, apple: true }));
-    try {
-      await signInWithApple();
-
-      Toast.show({
-        type: "success",
-        text1: "Welcome back!",
-        onPress: () => router.replace("/(tabs)"),
-      });
-
-      setTimeout(() => {
-        router.replace("/(tabs)");
-      }, 1500);
-    } catch (error: any) {
-      console.error("Apple Sign-In error:", error);
-      Toast.show({
-        type: "error",
-        text1: "Apple Sign-In Failed",
-        text2: error.message || "Please try again",
-      });
-    } finally {
-      setSocialLoading((prev) => ({ ...prev, apple: false }));
-    }
-  };
-
-  const handleTwitterSignIn = async () => {
-    setSocialLoading((prev) => ({ ...prev, twitter: true }));
-    try {
-      await signInWithTwitter();
-
-      Toast.show({
-        type: "success",
-        text1: "Welcome back!",
-        onPress: () => router.replace("/(tabs)"),
-      });
-
-      setTimeout(() => {
-        router.replace("/(tabs)");
-      }, 1500);
-    } catch (error: any) {
-      console.error("Twitter Sign-In error:", error);
-      Toast.show({
-        type: "error",
-        text1: "Twitter Sign-In Failed",
-        text2: error.message || "Please try again",
-      });
-    } finally {
-      setSocialLoading((prev) => ({ ...prev, twitter: false }));
     }
   };
 
@@ -273,7 +164,7 @@ export default function LoginScreen() {
               </View>
 
               {/* Social authentication buttons */}
-              <View className="flex-row justify-between gap-2">
+              {/* <View className="flex-row justify-between gap-2">
                 <TouchableOpacity
                   className="flex-1 bg-white rounded-lg p-2 border border-gray-200 items-center"
                   onPress={handleGoogleSignIn}
@@ -318,7 +209,7 @@ export default function LoginScreen() {
                     />
                   )}
                 </TouchableOpacity>
-              </View>
+              </View> */}
 
               <TouchableOpacity
                 onPress={() => router.push("/(auth)/forgot-password")}
