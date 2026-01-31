@@ -15,8 +15,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-import { isValidEmail } from "@/lib/utils";
-import { RegisterUserPayload } from "@/services/auth/auth.types";
+import { registerFormSchema } from "@/services/auth/auth.schema";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -27,52 +26,30 @@ export default function RegisterScreen() {
   const { refreshAuthState } = useAuth();
 
   const handleRegister = async () => {
-    // Input validation
-    if (!name || !email || !password || !confirmPassword) {
+    const result = registerFormSchema.safeParse({
+      displayName: name,
+      email,
+      password,
+      confirmPassword,
+    });
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message ?? "Invalid input";
       Toast.show({
         type: "error",
         text1: "Error",
-        text2: "Please fill in all fields",
+        text2: firstError,
       });
       return;
     }
 
-    if (!isValidEmail(email)) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter a valid email address",
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Password must be at least 6 characters long",
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Passwords do not match",
-      });
-      return;
-    }
-
+    const payload = result.data;
     setLoading(true);
     try {
-      const payload: RegisterUserPayload = {
-        email: email.trim(),
-        password: password,
-        displayName: name.trim(),
-      };
-
-      const response = await registerUser(payload);
+      const response = await registerUser({
+        email: payload.email,
+        password: payload.password,
+        displayName: payload.displayName,
+      });
       console.log(
         "🚀 ~ handleRegister ~ response:",
         JSON.stringify(response, null, 2),

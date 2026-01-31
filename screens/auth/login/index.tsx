@@ -17,8 +17,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-import { isValidEmail } from "@/lib/utils";
-import { LoginUserPayload } from "@/services/auth/auth.types";
+import { loginFormSchema } from "@/services/auth/auth.schema";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -27,39 +26,23 @@ export default function LoginScreen() {
   const { refreshAuthState } = useAuth();
 
   const handleLogin = async () => {
-    // Input validation
-    if (!email || !password) {
+    const result = loginFormSchema.safeParse({ email, password });
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message ?? "Invalid input";
       Toast.show({
         type: "error",
-        text1: "All fields are required",
+        text1: firstError,
       });
       return;
     }
 
-    if (!isValidEmail(email)) {
-      Toast.show({
-        type: "error",
-        text1: "Invalid email address",
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      Toast.show({
-        type: "error",
-        text1: "Password must be at least 6 characters long",
-      });
-      return;
-    }
-
+    const payload = result.data;
     setLoading(true);
     try {
-      const payload: LoginUserPayload = {
-        email: email.trim(),
-        password: password,
-      };
-
-      const response = await loginUser(payload);
+      const response = await loginUser({
+        email: payload.email,
+        password: payload.password,
+      });
       console.log(
         "🚀 ~ handleLogin ~ response:",
         JSON.stringify(response, null, 2),
