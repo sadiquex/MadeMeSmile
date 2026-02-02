@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import { TOKEN_STORAGE_KEY } from "@/lib/auth-tokens";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   LoginUserPayload,
@@ -8,7 +9,6 @@ import {
 } from "./auth.types";
 
 const USER_STORAGE_KEY = "@mademesmile_user";
-const TOKEN_STORAGE_KEY = "@mademesmile_token";
 const ONBOARDING_STORAGE_KEY = "@mademesmile_onboarding_completed";
 
 /** Stored user shape – matches API user from login/register */
@@ -46,7 +46,7 @@ export async function loginUser(
     const response = await api.post("/auth/login", data);
     return response.data;
   } catch (error) {
-    console.error("Error logging in user:", error);
+    // console.error("Error logging in user:", error);
     throw error;
   }
 }

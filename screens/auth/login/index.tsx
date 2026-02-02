@@ -43,10 +43,10 @@ export default function LoginScreen() {
         email: payload.email,
         password: payload.password,
       });
-      console.log(
-        "🚀 ~ handleLogin ~ response:",
-        JSON.stringify(response, null, 2),
-      );
+      // console.log(
+      //   "🚀 ~ handleLogin ~ response:",
+      //   JSON.stringify(response, null, 2),
+      // );
 
       if (response.success && response.data) {
         const token =
@@ -65,12 +65,11 @@ export default function LoginScreen() {
         });
       }
     } catch (error: any) {
-      console.error("Login error:", error);
       const errorMessage = error?.message || "Login failed. Please try again.";
       Toast.show({
         type: "error",
-        text1: "Login Failed",
-        text2: errorMessage,
+        text1: error?.response?.data?.message ?? errorMessage,
+        // text2: errorMessage,
       });
     } finally {
       setLoading(false);

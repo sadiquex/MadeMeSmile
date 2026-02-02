@@ -6,7 +6,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
-import { MomentService } from "../../services/MomentService";
+// import { MomentService } from "../../services/MomentService";
 
 export default function ProfileScreenComponent() {
   const [stats, setStats] = useState({
@@ -18,17 +18,17 @@ export default function ProfileScreenComponent() {
   const { user, signOut } = useAuth();
 
   useEffect(() => {
-    loadStats();
+    // loadStats();
   }, []);
 
-  const loadStats = async () => {
-    try {
-      const momentStats = await MomentService.getMomentStats();
-      setStats(momentStats);
-    } catch (error) {
-      console.error("Error loading stats:", error);
-    }
-  };
+  // const loadStats = async () => {
+  //   try {
+  //     const momentStats = await MomentService.getMomentStats();
+  //     setStats(momentStats);
+  //   } catch (error) {
+  //     console.error("Error loading stats:", error);
+  //   }
+  // };
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [

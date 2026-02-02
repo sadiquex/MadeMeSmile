@@ -21,22 +21,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
+import { addMoment } from "@/services/moments/moments.service";
 import { MediaFile, MediaService } from "../../services/MediaService";
-import {
-  addMoment,
-  CreateMomentData,
-} from "../../services/moments/moments.service";
 import { COLLECTION_OPTIONS, MOOD_OPTIONS } from "../../types";
 import SaveToCollectionModal from "./save-to-collection-modal";
 
 export default function AddMoment() {
   const router = useRouter();
-  const [content, setContent] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("random");
+  const [description, setDescription] = useState("");
   const [selectedMood, setSelectedMood] = useState<string>("");
   const [selectedCollection, setSelectedCollection] = useState<string>("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
 
   const [mediaFile, setMediaFile] = useState<MediaFile | null>(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
@@ -47,30 +41,42 @@ export default function AddMoment() {
   const MEDIA_HEIGHT = SCREEN_HEIGHT * 0.5;
 
   const handleSaveMoment = async () => {
-    // if (!content.trim()) {
-    //   Alert.alert("Error", "Please write something about your moment");
-    //   return;
-    // }
+    if (!mediaFile) {
+      Alert.alert(
+        "Media Required",
+        "Please add a photo, video, or audio to your moment.",
+      );
+      return;
+    }
+    if (!selectedMood) {
+      Alert.alert("Feeling Required", "Please select how you're feeling.");
+      return;
+    }
+    if (!selectedCollection) {
+      Alert.alert(
+        "Collection Required",
+        "Please add your moment to a collection.",
+      );
+      return;
+    }
 
     setIsLoading(true);
 
     try {
-      const momentData: CreateMomentData = {
-        content: content.trim(),
-        mediaType: mediaFile ? mediaFile.type : "text",
-        mediaUrl: mediaFile?.uri,
-        category: selectedCategory,
-        collection: selectedCollection || undefined,
-        tags,
-        mood: selectedMood as
-          | "happy"
-          | "grateful"
-          | "excited"
-          | "peaceful"
-          | undefined,
-      };
+      const collectionLabel =
+        COLLECTION_OPTIONS.find((c) => c.value === selectedCollection)?.label ??
+        selectedCollection;
 
-      await addMoment(momentData);
+      await addMoment({
+        media: {
+          uri: mediaFile.uri,
+          type: mediaFile.type,
+          name: mediaFile.name,
+        },
+        description: description.trim() || "My moment",
+        feeling: selectedMood,
+        collection: collectionLabel,
+      });
 
       Alert.alert("Success!", "Your moment has been saved! 🎉", [
         {
@@ -89,7 +95,7 @@ export default function AddMoment() {
         "Error",
         error instanceof Error
           ? error.message
-          : "Failed to save your moment. Please try again."
+          : "Failed to save your moment. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -97,12 +103,9 @@ export default function AddMoment() {
   };
 
   const resetForm = () => {
-    setContent("");
-    setSelectedCategory("random");
+    setDescription("");
     setSelectedMood("");
     setSelectedCollection("");
-    setTags([]);
-    setNewTag("");
     setMediaFile(null);
   };
 
@@ -122,17 +125,6 @@ export default function AddMoment() {
     setMediaFile(null);
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag("");
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
-  };
-
   const handleCollectionSelect = (collection: string) => {
     setSelectedCollection(collection);
     setShowCollectionModal(false);
@@ -140,7 +132,7 @@ export default function AddMoment() {
 
   const getSelectedCollectionLabel = () => {
     const collection = COLLECTION_OPTIONS.find(
-      (c) => c.value === selectedCollection
+      (c) => c.value === selectedCollection,
     );
     return collection
       ? `${collection.icon} ${collection.label}`
@@ -183,8 +175,8 @@ export default function AddMoment() {
                             mediaFile.type === "photo"
                               ? "image"
                               : mediaFile.type === "video"
-                              ? "videocam"
-                              : "mic"
+                                ? "videocam"
+                                : "mic"
                           }
                           size={20}
                           color="#3B82F6"
@@ -253,51 +245,18 @@ export default function AddMoment() {
                   What made you smile today?
                 </Text>
                 <Textarea
-                  value={content}
-                  onChangeText={setContent}
-                  placeholder="What made you smile today..."
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Describe your moment..."
                   maxLength={280}
                   className="border-dashed border-gray-300 text-gray-800 placeholder:text-gray-400 flex-1"
                 />
                 <Text className="font-sora text-gray-400 text-xs mt-2 text-right">
-                  {content.length}/280
+                  {description.length}/280
                 </Text>
               </View>
 
-              {/* Category Selection */}
-              {/* <View className="">
-                <Text className="font-sora-medium text-gray-900 mb-2">
-                  Category
-                </Text>
-                <View className="flex-row flex-wrap gap-3">
-                  {DEFAULT_CATEGORIES.map((category) => (
-                    <TouchableOpacity
-                      key={category.id}
-                      className={`${
-                        selectedCategory === category.id
-                          ? "bg-primary"
-                          : "bg-white border border-gray-200"
-                      } px-4 py-1 rounded-full items-center`}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setSelectedCategory(category.id);
-                      }}
-                    >
-                      <Text
-                        className={`font-sora text-xs ${
-                          selectedCategory === category.id
-                            ? "text-white"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {category.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View> */}
-
-              {/* Mood Selection */}
+              {/* Feeling */}
               <View className="">
                 <Text className="font-sora-medium text-gray-900 mb-2">
                   How are you feeling?
@@ -331,53 +290,11 @@ export default function AddMoment() {
                 </View>
               </View>
 
-              {/* Tags */}
-              {/* <View className="">
+              {/* Collection */}
+              <View>
                 <Text className="font-sora-medium text-gray-900 mb-2">
-                  Hashtags? (Optional)
+                  Add to Collection
                 </Text>
-
-                <View className="flex-row items-center mb-2">
-                  <TextInput
-                    className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-3 font-sora text-gray-900"
-                    placeholder="Add some hashtags..."
-                    value={newTag}
-                    onChangeText={setNewTag}
-                    onSubmitEditing={addTag}
-                    returnKeyType="done"
-                    autoCapitalize="none"
-                  />
-                  <TouchableOpacity
-                    className="ml-3 bg-primary rounded-lg px-4 py-3"
-                    onPress={addTag}
-                  >
-                    <Ionicons name="add" size={20} color="white" />
-                  </TouchableOpacity>
-                </View>
-
-                {tags.length > 0 && (
-                  <View className="flex-row flex-wrap gap-2">
-                    {tags.map((tag, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        className="bg-blue-100 rounded-full px-3 py-2 flex-row items-center"
-                        onPress={() => removeTag(tag)}
-                      >
-                        <Text className="font-sora text-blue-600 text-sm mr-2">
-                          #{tag}
-                        </Text>
-                        <Ionicons name="close" size={14} color="#3B82F6" />
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View> */}
-
-              {/* Collection Selection */}
-              <View className="">
-                {/* <Text className="font-sora-medium text-gray-900 mb-2">
-                  Add to Collection (optional)
-                </Text> */}
                 <TouchableOpacity
                   className={`w-full ${
                     selectedCollection

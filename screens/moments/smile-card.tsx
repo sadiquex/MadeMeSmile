@@ -1,23 +1,42 @@
 import VideoPlayer from "@/components/ui/video-player";
-import { getCategoryColor, getCategoryIcon } from "@/lib/utils";
+import {
+  formatDateAndTime,
+  getCategoryColor,
+  getCategoryIcon,
+} from "@/lib/utils";
+import { IMoment } from "@/services/moments/moments.types";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import { Moment } from "../../types";
+
+const VIDEO_EXTENSIONS = [".mp4", ".webm", ".mov", ".m4v"];
+const AUDIO_EXTENSIONS = [".mp3", ".wav", ".m4a", ".aac"];
+
+function inferMediaType(mediaUrl: string): "photo" | "video" | "audio" {
+  const lower = mediaUrl.toLowerCase();
+  if (VIDEO_EXTENSIONS.some((ext) => lower.includes(ext))) return "video";
+  if (AUDIO_EXTENSIONS.some((ext) => lower.includes(ext))) return "audio";
+  return "photo";
+}
 
 interface SmileCardProps {
-  moment: Moment;
+  moment: IMoment;
 }
 
 export default function SmileCard({ moment }: SmileCardProps) {
   const router = useRouter();
+  const mediaType = moment.mediaUrl ? inferMediaType(moment.mediaUrl) : "photo";
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/moment/${moment.id}`);
   };
+
+  const categoryKey = (moment.collection || moment.feeling || "random")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
 
   return (
     <TouchableOpacity
@@ -34,13 +53,13 @@ export default function SmileCard({ moment }: SmileCardProps) {
     >
       {/* Media Section */}
       <View className="relative">
-        {moment.mediaUrl && moment.mediaType === "photo" ? (
+        {moment.mediaUrl && mediaType === "photo" ? (
           <Image
             source={{ uri: moment.mediaUrl }}
             className="w-full h-[280px]"
             resizeMode="cover"
           />
-        ) : moment.mediaUrl && moment.mediaType === "video" ? (
+        ) : moment.mediaUrl && mediaType === "video" ? (
           <VideoPlayer
             uri={moment.mediaUrl}
             width="100%"
@@ -55,11 +74,11 @@ export default function SmileCard({ moment }: SmileCardProps) {
             <View className="bg-white/80 rounded-full p-6 shadow-sm">
               <Ionicons
                 name={
-                  moment.mediaType === "video"
+                  mediaType === "video"
                     ? "videocam"
-                    : moment.mediaType === "audio"
-                    ? "mic"
-                    : "document-text"
+                    : mediaType === "audio"
+                      ? "mic"
+                      : "document-text"
                 }
                 size={32}
                 color="#6B7280"
@@ -71,18 +90,18 @@ export default function SmileCard({ moment }: SmileCardProps) {
         {/* Category Badge - Top Left */}
         <View className="absolute top-4 left-4">
           <View
-            className={`${getCategoryColor(
-              moment.category
-            )} rounded-2xl px-3 py-1.5 flex-row items-center shadow-sm`}
+            className={`${getCategoryColor(categoryKey)} rounded-2xl px-3 py-1.5 flex-row items-center shadow-sm`}
           >
             <Ionicons
-              name={getCategoryIcon(moment.category) as any}
+              name={getCategoryIcon(categoryKey) as any}
               size={14}
               color="white"
             />
             <Text className="font-sora-medium text-white text-xs ml-2">
-              {moment.category.charAt(0).toUpperCase() +
-                moment.category.slice(1)}
+              {(moment.collection || moment.feeling || "Moment")
+                .charAt(0)
+                .toUpperCase() +
+                (moment.collection || moment.feeling || "Moment").slice(1)}
             </Text>
           </View>
         </View>
@@ -92,11 +111,11 @@ export default function SmileCard({ moment }: SmileCardProps) {
           <View className="bg-black/20 backdrop-blur-sm rounded-full p-2">
             <Ionicons
               name={
-                moment.mediaType === "video"
+                mediaType === "video"
                   ? "play-circle"
-                  : moment.mediaType === "audio"
-                  ? "volume-high"
-                  : "image"
+                  : mediaType === "audio"
+                    ? "volume-high"
+                    : "image"
               }
               size={16}
               color="white"
@@ -107,31 +126,23 @@ export default function SmileCard({ moment }: SmileCardProps) {
 
       {/* Content Section */}
       <View className="p-6">
-        {/* Message */}
-        <Text className="font-sora text-gray-800 text-base leading-6 mb-4">
-          {moment.content.length > 70
-            ? moment.content.slice(0, 70) + "..."
-            : moment.content}
-        </Text>
+        {/* Description */}
+        {moment.description && (
+          <Text className="font-sora text-gray-800 text-base leading-6 mb-4">
+            {moment.description.length > 70
+              ? moment.description.slice(0, 70) + "..."
+              : moment.description}
+          </Text>
+        )}
 
-        {/* Tags */}
-        {moment.tags.length > 0 && (
+        {/* Feeling badge */}
+        {moment.feeling && (
           <View className="flex-row flex-wrap gap-2 mb-4">
-            {moment.tags.slice(0, 4).map((tag: string, index: number) => (
-              <View
-                key={index}
-                className="bg-gray-100 rounded-full px-3 py-1.5"
-              >
-                <Text className="font-sora text-gray-600 text-xs">#{tag}</Text>
-              </View>
-            ))}
-            {moment.tags.length > 4 && (
-              <View className="bg-gray-100 rounded-full px-3 py-1.5">
-                <Text className="font-sora text-gray-600 text-xs">
-                  +{moment.tags.length - 4} more
-                </Text>
-              </View>
-            )}
+            <View className="bg-gray-100 rounded-full px-3 py-1.5">
+              <Text className="font-sora text-gray-600 text-xs capitalize">
+                {moment.feeling}
+              </Text>
+            </View>
           </View>
         )}
 
@@ -140,14 +151,7 @@ export default function SmileCard({ moment }: SmileCardProps) {
           <View className="flex-row items-center">
             <Ionicons name="time-outline" size={16} color="#9CA3AF" />
             <Text className="font-sora text-gray-500 text-sm ml-2">
-              {new Date(moment.createdAt).toLocaleDateString()}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center">
-            <Ionicons name="heart-outline" size={16} color="#9CA3AF" />
-            <Text className="font-sora text-gray-500 text-sm ml-1">
-              {moment.likes || 0}
+              {formatDateAndTime(new Date(moment.createdAt))}
             </Text>
           </View>
         </View>

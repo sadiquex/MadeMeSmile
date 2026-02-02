@@ -1,9 +1,12 @@
 import { Container } from "@/components/ui/container";
 import ScreenHeader, { HeaderHeightSpace } from "@/components/ui/screen-header";
 import { MomentsListSkeleton } from "@/components/ui/skeleton";
+import { getErrorMessage } from "@/lib/utils";
+import { getMoments } from "@/services/moments/moments.service";
+import { IMoment } from "@/services/moments/moments.types";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   RefreshControl,
@@ -12,16 +15,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  getMoments,
-  getMomentsByCategory,
-} from "../../services/moments/moments.service";
-import { Category, DEFAULT_CATEGORIES, Moment } from "../../types";
+import { Category, DEFAULT_CATEGORIES } from "../../types";
 import SmileCard from "./smile-card";
 
 export default function MomentsComponent() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [moments, setMoments] = useState<Moment[]>([]);
+  const [moments, setMoments] = useState<IMoment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,57 +29,14 @@ export default function MomentsComponent() {
 
   const fetchMoments = async () => {
     try {
+      setIsLoading(true);
       setError(null);
-      const fetchedMoments = await getMoments();
-
-      setMoments(fetchedMoments);
-    } catch (err) {
-      console.error("Error fetching moments:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch moments");
+      const response = await getMoments();
+      setMoments(response.data);
+    } catch (error) {
+      setError(getErrorMessage(error));
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchMomentsByCategory = async (category: string) => {
-    try {
-      setError(null);
-      const fetchedMoments = await getMomentsByCategory(category);
-      setMoments(fetchedMoments);
-    } catch (err) {
-      console.error("Error fetching moments by category:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch moments");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    if (selectedCategory === "all") {
-      await fetchMoments();
-    } else {
-      await fetchMomentsByCategory(selectedCategory);
-    }
-    setIsRefreshing(false);
-  };
-
-  const refetchMoments = useCallback(async () => {
-    if (selectedCategory === "all") {
-      await fetchMoments();
-    } else {
-      await fetchMomentsByCategory(selectedCategory);
-    }
-  }, [selectedCategory]);
-
-  const handleCategoryChange = async (category: string) => {
-    setSelectedCategory(category);
-    setIsLoading(true);
-
-    if (category === "all") {
-      await fetchMoments();
-    } else {
-      await fetchMomentsByCategory(category);
     }
   };
 
@@ -88,25 +44,10 @@ export default function MomentsComponent() {
     fetchMoments();
   }, []);
 
-  // Refetch data when screen comes into focus (e.g., returning from add moment screen)
-  useFocusEffect(
-    useCallback(() => {
-      // Only refetch if we're not already loading
-      if (!isLoading) {
-        // Small delay to prevent excessive refetching
-        const timeoutId = setTimeout(() => {
-          refetchMoments();
-        }, 100);
-
-        return () => clearTimeout(timeoutId);
-      }
-    }, [isLoading, refetchMoments])
-  );
-
   const filteredMoments = moments;
 
   const renderMomentsList = () => {
-    return filteredMoments.map((moment: Moment) => (
+    return filteredMoments.map((moment: IMoment) => (
       <View key={moment.id} className="mb-4">
         <SmileCard moment={moment} />
       </View>
@@ -125,15 +66,10 @@ export default function MomentsComponent() {
         <ScrollView
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: false }
+            { useNativeDriver: false },
           )}
           scrollEventThrottle={16}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={handleRefresh}
-            />
-          }
+          refreshControl={<RefreshControl refreshing={isRefreshing} />}
         >
           {/* empty space to prevent header from covering the content */}
           <HeaderHeightSpace style={{ height: 110 }} />
@@ -152,7 +88,6 @@ export default function MomentsComponent() {
                     ? "bg-red-500"
                     : "bg-white border border-gray-300"
                 } rounded-full px-4 py-2.5 flex-row items-center`}
-                onPress={() => handleCategoryChange("all")}
               >
                 <Text
                   className={`font-sora-medium text-sm ${
@@ -171,7 +106,6 @@ export default function MomentsComponent() {
                       ? "bg-red-500"
                       : "bg-white border border-gray-300"
                   } rounded-full px-4 py-2.5 flex-row items-center`}
-                  onPress={() => handleCategoryChange(category.id)}
                 >
                   <Text
                     className={`font-sora-medium text-sm ${
@@ -204,10 +138,7 @@ export default function MomentsComponent() {
                 <Text className="font-sora text-gray-600 text-center px-8 mb-4">
                   {error}
                 </Text>
-                <TouchableOpacity
-                  className="bg-red-500 rounded-lg px-6 py-3"
-                  onPress={handleRefresh}
-                >
+                <TouchableOpacity className="bg-red-500 rounded-lg px-6 py-3">
                   <Text className="font-sora-medium text-white">Try Again</Text>
                 </TouchableOpacity>
               </View>

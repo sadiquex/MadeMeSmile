@@ -32,7 +32,7 @@ export const getCategoryColor = (category: string) => {
 };
 
 export const getCategoryGradientColors = (
-  category: string
+  category: string,
 ): [string, string, string] => {
   switch (category) {
     case "family":
@@ -103,3 +103,25 @@ export const isValidEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
+
+/**
+ * Extracts a user-friendly error message from API/axios errors.
+ * Reusable across services for consistent error handling.
+ */
+export function getErrorMessage(error: unknown): string {
+  if (error && typeof error === "object" && "response" in error) {
+    const axiosError = error as {
+      response?: { data?: { message?: string }; status?: number };
+    };
+    const message = axiosError.response?.data?.message;
+    if (message) return message;
+    if (axiosError.response?.status === 401)
+      return "Please sign in to continue";
+    if (axiosError.response?.status === 404) return "Resource not found";
+    if (axiosError.response?.status && axiosError.response.status >= 500)
+      return "Server error. Please try again later.";
+  }
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Something went wrong. Please try again.";
+}

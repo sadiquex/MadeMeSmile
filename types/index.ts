@@ -1,17 +1,3 @@
-export interface Moment {
-  id: string;
-  content: string;
-  mediaType: "photo" | "video" | "audio" | "text";
-  mediaUrl?: string;
-  category: string;
-  collection?: string;
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  mood?: "happy" | "grateful" | "excited" | "peaceful";
-  likes?: number;
-}
-
 export interface Category {
   id: string;
   name: string;
