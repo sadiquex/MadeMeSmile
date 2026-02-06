@@ -58,6 +58,12 @@ export default function MomentsComponent() {
     router.push("/(tabs)/add-moment");
   };
 
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchMoments();
+    setIsRefreshing(false);
+  };
+
   return (
     <>
       <ScreenHeader title="Moments" />
@@ -69,7 +75,16 @@ export default function MomentsComponent() {
             { useNativeDriver: false },
           )}
           scrollEventThrottle={16}
-          refreshControl={<RefreshControl refreshing={isRefreshing} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={["#EF4444"]}
+              tintColor="#EF4444"
+              progressBackgroundColor="#fff"
+              progressViewOffset={100}
+            />
+          }
         >
           {/* empty space to prevent header from covering the content */}
           <HeaderHeightSpace style={{ height: 110 }} />
